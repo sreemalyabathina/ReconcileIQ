@@ -116,13 +116,14 @@ tr:hover td{filter:brightness(.975);}
 .skip-bar{font-size:12px;color:var(--s);padding:10px 14px;background:var(--bg);border-top:1px solid var(--br);}
 .err-m{color:var(--r);font-size:13px;margin-top:10px;}
 .tbl-empty{text-align:center;padding:40px;color:var(--s);}
+#pager button:disabled{opacity:.4;cursor:not-allowed;}
 </style>
 </head>
 <body>
 
 <div class="hdr">
   <div class="logo">ReconcileIQ<span class="logo-s">Compare any two data files</span></div>
-  <div class="priv">🔒 100% offline — your data never leaves this device</div>
+  
 </div>
 
 <div class="page">
@@ -224,13 +225,14 @@ tr:hover td{filter:brightness(.975);}
       <div class="touter">
         <div class="twrap"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
         <div class="skip-bar hid" id="skipbar"></div>
+        <div id="pager" style="display:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg);border-top:1px solid var(--br);flex-wrap:wrap;"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-let headA=[],headB=[],dataA=[],dataB=[],colMap={},keyCol='',results=[],curF='all';
+let headA=[],headB=[],dataA=[],dataB=[],colMap={},keyCol='',results=[],curF='all',curPage=0,pageSize=200;
 
 const SA=[
   {"emp id":"1","Employee name":"Ann","Service center":"108041",SSN:"xxx-xx-123",Salary:"20",Address:"union ave",Grade:"16"},
@@ -360,30 +362,26 @@ function buildTbl(pairs){
 function renderTbl(pairs){
   const A=LA(),B=LB(),cols=pairs.map(([a])=>a);
   const vis=curF==='all'?results:results.filter(r=>r.status===curF);
-  if(!vis.length){document.getElementById('tb').innerHTML='<tr><td colspan="30" class="tbl-empty">No rows match this filter.</td></tr>';return;}
-  document.getElementById('tb').innerHTML=vis.map(r=>{
+  if(!vis.length){document.getElementById('tb').innerHTML='<tr><td colspan="30" class="tbl-empty">No rows match this filter.</td></tr>';renderPager(0,0);return;}
+  const totalPages=Math.ceil(vis.length/pageSize);
+  if(curPage>=totalPages)curPage=totalPages-1;
+  const page=vis.slice(curPage*pageSize,(curPage+1)*pageSize);
+  document.getElementById('tb').innerHTML=page.map(r=>{
     let badge='',rc='';
     if(r.status==='match'){badge='<span class="bdg bm">✓ Match</span>';}
     else if(r.status==='mismatch'){badge='<span class="bdg bmm">⚠ Mismatch</span>';rc='rmm';}
     else if(r.status==='missing-a'){badge=`<span class="bdg boa">Missing in ${B}</span>`;rc='roa';}
     else if(r.status==='missing-b'){badge=`<span class="bdg bob">Missing in ${A}</span>`;rc='rob';}
     else{badge='<span class="bdg bsk">Skipped</span>';}
-
-    // Mismatched fields cell — the key improvement
     let mfCell='<span class="vm">—</span>';
     if(r.status==='mismatch'&&r.diffs.length){
       mfCell='<div class="flist">'+r.diffs.map(d=>{
         const va=d.valA||'(blank)',vb=d.valB||'(blank)';
         return`<span class="ftag" title="${d.colA} in ${A}: ${va} | ${d.colB} in ${B}: ${vb}">${d.colA}: ${va} → ${vb}</span>`;
       }).join('')+'</div>';
-    } else if(r.status==='missing-a'){
-      mfCell=`<span class="miss-note">Record found in ${A} but not in ${B}</span>`;
-    } else if(r.status==='missing-b'){
-      mfCell=`<span class="miss-note">Record found in ${B} but not in ${A}</span>`;
-    } else if(r.status==='blank-key'){
-      mfCell=`<span class="miss-note">Key column "${keyCol}" is blank — cannot match</span>`;
-    }
-
+    } else if(r.status==='missing-a'){mfCell=`<span class="miss-note">Record found in ${A} but not in ${B}</span>`;}
+    else if(r.status==='missing-b'){mfCell=`<span class="miss-note">Record found in ${B} but not in ${A}</span>`;}
+    else if(r.status==='blank-key'){mfCell=`<span class="miss-note">Key column "${keyCol}" is blank — cannot match</span>`;}
     const cells=cols.map(col=>{
       if(r.status==='missing-b'){const v=r.rowB?.[colMap[col]]??'';return`<td>${v||'<span class="vb">(blank)</span>'}</td>`;}
       if(r.status==='missing-a'||r.status==='blank-key'){const v=r.rowA?.[col]??'';return`<td>${v||'<span class="vb">(blank)</span>'}</td>`;}
@@ -391,12 +389,28 @@ function renderTbl(pairs){
       if(diff)return`<td title="${A}: ${diff.valA||'(blank)'} | ${B}: ${diff.valB||'(blank)'}"><span class="vd">${diff.valA||'(blank)'}</span><span class="vv">→</span><span class="vm">${diff.valB||'(blank)'}</span></td>`;
       const v=r.rowA?.[col]??'';return`<td>${v||'<span class="vb">(blank)</span>'}</td>`;
     }).join('');
-
     return`<tr class="${rc}"><td>${badge}</td><td><strong>${r.key}</strong></td><td class="wrap-cell">${mfCell}</td>${cells}</tr>`;
   }).join('');
+  renderPager(vis.length,totalPages);
 }
 
-function filt(f,btn){
+function renderPager(total,totalPages){
+  const el=document.getElementById('pager');
+  if(totalPages<=1){el.style.display='none';return;}
+  el.style.display='flex';
+  const start=curPage*pageSize+1, end=Math.min((curPage+1)*pageSize,total);
+  el.innerHTML=`
+    <button class="btn-g" onclick="goPage(${curPage-1})" ${curPage===0?'disabled':''}>← Prev</button>
+    <span style="font-size:13px;color:var(--s)">Showing <strong>${start}–${end}</strong> of <strong>${total.toLocaleString()}</strong> rows &nbsp;·&nbsp; Page ${curPage+1} of ${totalPages}</span>
+    <button class="btn-g" onclick="goPage(${curPage+1})" ${curPage===totalPages-1?'disabled':''}>Next →</button>
+    <select onchange="changePageSize(this.value)" style="font-size:12px;padding:5px 8px;border:1px solid var(--br);border-radius:6px;background:var(--w)">
+      ${[100,200,500].map(n=>`<option value="${n}"${n===pageSize?' selected':''}>${n} per page</option>`).join('')}
+    </select>`;
+}
+function goPage(p){curPage=p;renderTbl(Object.entries(colMap).filter(([a,b])=>b));window.scrollTo({top:document.getElementById('s3').offsetTop-20,behavior:'smooth'});}
+function changePageSize(v){pageSize=parseInt(v);curPage=0;renderTbl(Object.entries(colMap).filter(([a,b])=>b));}
+
+function filt(f,btn){curPage=0;
   curF=f;
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
   btn.classList.add(f==='mismatch'?'or':f==='missing-a'?'oa':f==='missing-b'?'ob':'on');
