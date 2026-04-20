@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReconcileIQ — Compare Any Two Data Files</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--g:#16A37F;--gd:#0D7A5F;--gl:#E8F8F4;--gb:#A7E3D4;--r:#DC2626;--rl:#FEF2F2;--a:#D97706;--al:#FFFBEB;--b:#2563EB;--bl:#EFF6FF;--br:#E5E7EB;--bg:#F7F8FA;--w:#fff;--t:#111827;--s:#6B7280;--xs:#9CA3AF;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;font-size:14px;}
+.hdr{background:var(--w);border-bottom:1px solid var(--br);padding:0 28px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:20;}
+.logo{font-size:18px;font-weight:800;color:var(--g);letter-spacing:-.5px;}
+.logo-s{font-size:13px;color:var(--s);margin-left:8px;font-weight:400;}
+.priv{margin-left:auto;font-size:11px;background:var(--gl);color:var(--gd);padding:4px 12px;border-radius:20px;border:1px solid var(--gb);font-weight:600;display:flex;align-items:center;gap:5px;}
+.page{max-width:940px;margin:0 auto;padding:28px 18px 64px;}
+.steps{display:flex;align-items:center;margin-bottom:28px;}
+.st{display:flex;align-items:center;gap:9px;}
+.sc{width:30px;height:30px;border-radius:50%;border:2px solid var(--br);background:var(--w);color:var(--s);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.sc.act{border-color:var(--g);background:var(--g);color:#fff;}
+.sc.don{border-color:var(--g);background:var(--g);color:#fff;}
+.sl{font-size:12px;font-weight:500;color:var(--s);}
+.sl.act{color:var(--t);font-weight:700;}
+.sdiv{flex:1;height:1px;background:var(--br);margin:0 14px;max-width:56px;}
+.card{background:var(--w);border:1px solid var(--br);border-radius:14px;padding:26px;margin-bottom:14px;}
+.ct{font-size:16px;font-weight:700;margin-bottom:5px;}
+.cd{font-size:13px;color:var(--s);line-height:1.6;margin-bottom:18px;}
+.ugrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:540px){.ugrid{grid-template-columns:1fr;}}
+.ubox{display:flex;flex-direction:column;gap:8px;}
+.ulbl{font-size:12px;font-weight:700;color:var(--t);display:flex;align-items:center;gap:8px;}
+.unum{width:22px;height:22px;border-radius:50%;background:var(--t);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.unum.ok{background:var(--g);}
+.dz{border:2px dashed var(--br);border-radius:12px;padding:30px 18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:115px;}
+.dz:hover,.dz.drag{border-color:var(--g);background:var(--gl);}
+.dz.ok{border-style:solid;border-color:var(--g);background:var(--gl);}
+.dz-ico{font-size:28px;margin-bottom:8px;}
+.dz-t{font-size:13px;font-weight:600;margin-bottom:3px;}
+.dz-s{font-size:12px;color:var(--s);}
+.dz-n{font-size:12px;font-weight:700;color:var(--gd);margin-top:5px;}
+.dz-c{font-size:11px;color:var(--s);margin-top:3px;text-decoration:underline;}
+.or{display:flex;align-items:center;gap:8px;margin:5px 0 2px;}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--br);}
+.or span{font-size:11px;color:var(--s);}
+.try{font-size:12px;color:var(--g);cursor:pointer;font-weight:600;text-align:center;display:block;}
+.try:hover{color:var(--gd);text-decoration:underline;}
+.lblrow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.lbl-g{display:flex;flex-direction:column;gap:4px;}
+.lbl-g label{font-size:11px;font-weight:700;color:var(--s);text-transform:uppercase;letter-spacing:.04em;}
+.lbl-g input{border:1px solid var(--br);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--t);outline:none;background:var(--w);}
+.lbl-g input:focus{border-color:var(--g);}
+.al{border-radius:10px;padding:11px 14px;font-size:13px;display:flex;align-items:flex-start;gap:9px;margin-top:10px;}
+.al-am{background:var(--al);border:1px solid #FCD34D;color:#92400E;}
+.hid{display:none!important;}
+.mhdr{display:grid;grid-template-columns:1fr 26px 1fr;gap:10px;margin-bottom:8px;}
+.mhdr span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--s);}
+.mrow{display:grid;grid-template-columns:1fr 26px 1fr;gap:10px;align-items:center;margin-bottom:8px;}
+.mchip{font-size:13px;font-weight:500;background:var(--bg);border:1px solid var(--br);border-radius:8px;padding:9px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.marr{text-align:center;color:#D1D5DB;font-size:17px;}
+.msel{width:100%;font-size:13px;border:1px solid var(--br);border-radius:8px;padding:9px 10px;background:var(--w);color:var(--t);outline:none;}
+.msel:focus{border-color:var(--g);}
+.msel.hit{border-color:var(--g);background:var(--gl);}
+.ksec{background:var(--bg);border-radius:10px;padding:16px;margin-top:4px;}
+.ksec select{width:100%;font-size:13px;border:1px solid var(--br);border-radius:8px;padding:10px 12px;margin-top:8px;background:var(--w);color:var(--t);outline:none;}
+.ksec select:focus{border-color:var(--g);}
+.btn-p{display:block;width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--g);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-top:18px;transition:background .18s,transform .1s;}
+.btn-p:hover:not(:disabled){background:var(--gd);transform:translateY(-1px);}
+.btn-p:active:not(:disabled){transform:translateY(0);}
+.btn-p:disabled{background:var(--br);color:var(--s);cursor:not-allowed;transform:none;}
+.btn-g{font-size:13px;padding:8px 16px;border-radius:8px;border:1px solid var(--br);background:var(--w);cursor:pointer;color:var(--s);font-weight:500;transition:all .15s;}
+.btn-g:hover{background:var(--bg);color:var(--t);}
+.btn-e{font-size:13px;padding:8px 18px;border-radius:8px;border:1px solid var(--gb);background:var(--gl);cursor:pointer;color:var(--gd);font-weight:700;transition:all .15s;}
+.btn-e:hover{background:#C9F0E6;}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:480px){.sgrid{grid-template-columns:repeat(2,1fr);}}
+.scard{background:var(--w);border:1px solid var(--br);border-radius:12px;padding:18px;text-align:center;}
+.sn{font-size:32px;font-weight:800;line-height:1;}
+.slbl{font-size:11px;color:var(--s);margin-top:5px;font-weight:500;}
+.sn.cg{color:var(--g);}.sn.cr{color:var(--r);}.sn.ca{color:var(--a);}.sn.cb{color:var(--b);}
+.fbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.flbl{font-size:12px;color:var(--s);font-weight:500;}
+.fb{font-size:12px;padding:5px 13px;border-radius:20px;border:1px solid var(--br);background:var(--w);cursor:pointer;color:var(--s);font-weight:500;transition:all .15s;}
+.fb:hover{border-color:var(--s);color:var(--t);}
+.fb.on{background:var(--t);color:#fff;border-color:var(--t);}
+.fb.or{background:#FEE2E2;color:#991B1B;border-color:#FECACA;}
+.fb.oa{background:#FEF9C3;color:#854D0E;border-color:#FDE68A;}
+.fb.ob{background:#DBEAFE;color:#1E40AF;border-color:#BFDBFE;}
+.rbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.rt{font-size:16px;font-weight:700;}
+.rs{font-size:12px;color:var(--s);margin-top:4px;line-height:1.6;}
+.touter{border-radius:10px;border:1px solid var(--br);overflow:hidden;}
+.twrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--s);background:var(--bg);border-bottom:1px solid var(--br);white-space:nowrap;letter-spacing:.03em;text-transform:uppercase;}
+td{padding:10px 14px;border-bottom:1px solid #F3F4F6;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;}
+td.wrap-cell{white-space:normal;min-width:200px;}
+tr:last-child td{border-bottom:none;}
+tr.rmm td{background:#FFF5F5;}
+tr.roa td{background:#FFFDF0;}
+tr.rob td{background:#F0F6FF;}
+tr:hover td{filter:brightness(.975);}
+.bdg{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;white-space:nowrap;}
+.bm{background:#DCFCE7;color:#166534;}
+.bmm{background:#FEE2E2;color:#991B1B;}
+.boa{background:#FEF9C3;color:#854D0E;}
+.bob{background:#DBEAFE;color:#1E40AF;}
+.bsk{background:#F3F4F6;color:#6B7280;}
+.flist{display:flex;flex-direction:column;gap:3px;min-width:180px;}
+.ftag{display:inline-block;font-size:11px;background:#FEE2E2;color:#991B1B;border-radius:5px;padding:2px 8px;font-weight:600;white-space:nowrap;margin-bottom:1px;}
+.miss-note{font-size:12px;color:var(--s);font-style:italic;}
+.vd{color:var(--r);font-weight:700;}
+.vv{color:#D1D5DB;font-size:10px;margin:0 3px;}
+.vb{color:var(--xs);font-style:italic;}
+.vm{color:var(--s);}
+.skip-bar{font-size:12px;color:var(--s);padding:10px 14px;background:var(--bg);border-top:1px solid var(--br);}
+.err-m{color:var(--r);font-size:13px;margin-top:10px;}
+.tbl-empty{text-align:center;padding:40px;color:var(--s);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">ReconcileIQ<span class="logo-s">Compare any two data files</span></div>
+  <div class="priv">🔒 100% offline — your data never leaves this device</div>
+</div>
+
+<div class="page">
+  <div class="steps">
+    <div class="st"><div class="sc act" id="dot1">1</div><div class="sl act" id="sl1">Upload Files</div></div>
+    <div class="sdiv"></div>
+    <div class="st"><div class="sc" id="dot2">2</div><div class="sl" id="sl2">Map Columns</div></div>
+    <div class="sdiv"></div>
+    <div class="st"><div class="sc" id="dot3">3</div><div class="sl" id="sl3">View Results</div></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="s1">
+    <div class="card">
+      <div class="ct">Upload your two files</div>
+      <div class="cd">Works with any CSV or Excel file from any system. Give each file a name so results are easy to understand — leave blank to use File A / File B.</div>
+      <div class="lblrow">
+        <div class="lbl-g"><label>Name for File A</label><input type="text" id="la" placeholder="e.g. Fusion HCM, SAP, Workday…"></div>
+        <div class="lbl-g"><label>Name for File B</label><input type="text" id="lb" placeholder="e.g. EBS, Oracle, ADP…"></div>
+      </div>
+      <div class="ugrid">
+        <div class="ubox">
+          <div class="ulbl"><div class="unum" id="na">A</div><span>File A — <span id="la-h">First file</span></span></div>
+          <div class="dz" id="dza" onclick="document.getElementById('ia').click()" ondragover="onDrag(event,'dza')" ondragleave="offDrag('dza')" ondrop="onDrop(event,'ia','dza','a',d=>{headA=d.h;dataA=d.r;rdy();})">
+            <div class="dz-ico" id="ia-i">📂</div><div class="dz-t" id="ia-t">Click or drag & drop</div>
+            <div class="dz-s">CSV, XLSX, XLS</div><div class="dz-n" id="ia-n"></div><div class="dz-c" id="ia-c" style="display:none">Click to change</div>
+          </div>
+          <input type="file" id="ia" accept=".csv,.xlsx,.xls" style="display:none" onchange="onInp(this,'dza','a',d=>{headA=d.h;dataA=d.r;rdy();})">
+          <div class="or"><span>or</span></div><span class="try" onclick="loadA()">✦ Load sample HR data</span>
+        </div>
+        <div class="ubox">
+          <div class="ulbl"><div class="unum" id="nb">B</div><span>File B — <span id="lb-h">Second file</span></span></div>
+          <div class="dz" id="dzb" onclick="document.getElementById('ib').click()" ondragover="onDrag(event,'dzb')" ondragleave="offDrag('dzb')" ondrop="onDrop(event,'ib','dzb','b',d=>{headB=d.h;dataB=d.r;rdy();})">
+            <div class="dz-ico" id="ib-i">📂</div><div class="dz-t" id="ib-t">Click or drag & drop</div>
+            <div class="dz-s">CSV, XLSX, XLS</div><div class="dz-n" id="ib-n"></div><div class="dz-c" id="ib-c" style="display:none">Click to change</div>
+          </div>
+          <input type="file" id="ib" accept=".csv,.xlsx,.xls" style="display:none" onchange="onInp(this,'dzb','b',d=>{headB=d.h;dataB=d.r;rdy();})">
+          <div class="or"><span>or</span></div><span class="try" onclick="loadB()">✦ Load sample Payroll data</span>
+        </div>
+      </div>
+      <div class="err-m hid" id="err1">⚠ Could not read file. Please use CSV or Excel format.</div>
+      <button class="btn-p" id="btn1" disabled onclick="goS2()">Continue to Column Mapping →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="s2" style="display:none">
+    <div class="card">
+      <div class="ct">Map columns between your files</div>
+      <div class="cd">Match each column from <strong id="la2">File A</strong> to its equivalent in <strong id="lb2">File B</strong>. Green border = auto-matched. Set any column to <em>Skip</em> to exclude it.</div>
+      <div class="mhdr"><span id="la2h">File A columns</span><span></span><span id="lb2h">File B columns</span></div>
+      <div id="mrows"></div>
+    </div>
+    <div class="card">
+      <div class="ct" style="margin-bottom:5px">Choose the unique key column</div>
+      <div class="cd">Pick the column that uniquely identifies each row — like Employee ID or Order Number. The tool uses it to match rows between files.</div>
+      <div class="ksec">
+        <div style="font-size:11px;font-weight:700;color:var(--s);text-transform:uppercase;letter-spacing:.04em">Key column (from <span id="la-k">File A</span>)</div>
+        <select id="kc" onchange="chkBlank()"></select>
+        <div class="al al-am hid" id="blkw">⚠ <span><strong id="blkn">0</strong> row(s) have a blank value here and will be skipped. Use a column like Employee ID that is always filled.</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-g" onclick="goS1()">← Back</button>
+      <button class="btn-p" style="margin-top:0;flex:1" onclick="run()">Find Mismatches →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="s3" style="display:none">
+    <div class="sgrid">
+      <div class="scard"><div class="sn cg" id="st0">—</div><div class="slbl">✓ Exact matches</div></div>
+      <div class="scard"><div class="sn cr" id="st1">—</div><div class="slbl">⚠ Mismatches</div></div>
+      <div class="scard"><div class="sn ca" id="st2">—</div><div class="slbl" id="st2l">Missing in File B</div></div>
+      <div class="scard"><div class="sn cb" id="st3">—</div><div class="slbl" id="st3l">Missing in File A</div></div>
+    </div>
+    <div class="card">
+      <div class="rbar">
+        <div>
+          <div class="rt">Comparison Results</div>
+          <div class="rs">
+            The <strong>Mismatched Fields</strong> column shows exactly which fields differ and what changed.<br>
+            <strong>Missing in [file name]</strong> means that record does not exist in that file.
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-e" onclick="exportXLSX()">⬇ Export Results (.xlsx)</button>
+          <button class="btn-g" onclick="restart()">↺ Start over</button>
+        </div>
+      </div>
+      <div class="fbar">
+        <span class="flbl">Filter:</span>
+        <button class="fb on" id="fb0" onclick="filt('all',this)">All rows</button>
+        <button class="fb" id="fb1" onclick="filt('mismatch',this)">⚠ Mismatches</button>
+        <button class="fb" id="fb2" onclick="filt('missing-a',this)">Missing in B</button>
+        <button class="fb" id="fb3" onclick="filt('missing-b',this)">Missing in A</button>
+        <button class="fb" id="fb4" onclick="filt('blank-key',this)">Skipped</button>
+      </div>
+      <div class="touter">
+        <div class="twrap"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+        <div class="skip-bar hid" id="skipbar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let headA=[],headB=[],dataA=[],dataB=[],colMap={},keyCol='',results=[],curF='all';
+
+const SA=[
+  {"emp id":"1","Employee name":"Ann","Service center":"108041",SSN:"xxx-xx-123",Salary:"20",Address:"union ave",Grade:"16"},
+  {"emp id":"2","Employee name":"Sree","Service center":"108041",SSN:"xxx-xx-124",Salary:"21",Address:"union ave",Grade:"16"},
+  {"emp id":"3","Employee name":"Deb","Service center":"108041",SSN:"xxx-xx-125",Salary:"22",Address:"union ave",Grade:"16"},
+  {"emp id":"4","Employee name":"Tia","Service center":"108041",SSN:"xxx-xx-126",Salary:"23",Address:"union ave",Grade:"16"},
+  {"emp id":"5","Employee name":"Kamryn","Service center":"108041",SSN:"xxx-xx-127",Salary:"24",Address:"union ave",Grade:"16"},
+  {"emp id":"6","Employee name":"Danielle","Service center":"108041",SSN:"xxx-xx-128",Salary:"25",Address:"union ave",Grade:"1"},
+  {"emp id":"7","Employee name":"Autumn","Service center":"109041",SSN:"xxx-xx-129",Salary:"26",Address:"union ave",Grade:"2"},
+  {"emp id":"8","Employee name":"Tamia","Service center":"108041",SSN:"xxx-xx-130",Salary:"27",Address:"union ave",Grade:"16"},
+];
+const SB=[
+  {"person number":"1",name:"Ann",dept:"108041",SSN:"xxx-xx-123",payrate:"21",Address:"union ave",level:"16"},
+  {"person number":"2",name:"Sree",dept:"108041",SSN:"xxx-xx-124",payrate:"21",Address:"union ave",level:"16"},
+  {"person number":"3",name:"Deb",dept:"108041",SSN:"xxx-xx-125",payrate:"22",Address:"union ave",level:"16"},
+  {"person number":"4",name:"Tia",dept:"108041",SSN:"xxx-xx-126",payrate:"23",Address:"union ave",level:"16"},
+  {"person number":"5",name:"Kamryn",dept:"108041",SSN:"xxx-xx-127",payrate:"24",Address:"union ave",level:"16"},
+  {"person number":"6",name:"Danielle",dept:"108041",SSN:"xxx-xx-128",payrate:"25",Address:"union ave",level:"1"},
+  {"person number":"7",name:"Autumn",dept:"109041",SSN:"xxx-xx-129",payrate:"26",Address:"union ave",level:"2"},
+  {"person number":"8",name:"Tamia",dept:"",SSN:"xxx-xx-431",payrate:"",Address:"",level:""},
+  {"person number":"9",name:"Tshanie",dept:"108041",SSN:"xxx-xx-131",payrate:"27",Address:"union ave",level:"16"},
+];
+
+function LA(){return document.getElementById('la').value.trim()||'File A';}
+function LB(){return document.getElementById('lb').value.trim()||'File B';}
+
+function setOk(side,text){
+  const p=side==='a';
+  document.getElementById(p?'dza':'dzb').classList.add('ok');
+  document.getElementById(p?'ia-i':'ib-i').textContent='✅';
+  document.getElementById(p?'ia-t':'ib-t').textContent='File loaded';
+  document.getElementById(p?'ia-n':'ib-n').textContent=text;
+  document.getElementById(p?'ia-c':'ib-c').style.display='block';
+  const num=document.getElementById(p?'na':'nb');num.classList.add('ok');num.textContent='✓';
+}
+function loadA(){headA=Object.keys(SA[0]);dataA=SA.map(r=>({...r}));setOk('a','Sample HR data — 8 rows');rdy();}
+function loadB(){headB=Object.keys(SB[0]);dataB=SB.map(r=>({...r}));setOk('b','Sample Payroll data — 9 rows');rdy();}
+
+function parseF(file,cb){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){Papa.parse(file,{header:true,skipEmptyLines:false,complete:r=>cb(r.meta.fields,r.data),error:()=>cb(null,null)});}
+  else{const fr=new FileReader();fr.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const j=XLSX.utils.sheet_to_json(ws,{defval:''});const h=j.length?Object.keys(j[0]):[];cb(h,j.map(r=>{const o={};h.forEach(k=>o[k]=String(r[k]??'').trim());return o;}));}catch(e){cb(null,null);}};fr.readAsArrayBuffer(file);}
+}
+function onInp(el,dz,side,cb){const f=el.files[0];if(!f)return;parseF(f,(h,d)=>{if(!h){document.getElementById('err1').classList.remove('hid');return;}document.getElementById('err1').classList.add('hid');setOk(side,f.name+' ('+d.length+' rows)');cb({h,r:d});});}
+function onDrag(e,id){e.preventDefault();document.getElementById(id).classList.add('drag');}
+function offDrag(id){document.getElementById(id).classList.remove('drag');}
+function onDrop(e,inId,dz,side,cb){e.preventDefault();offDrag(dz);const f=e.dataTransfer.files[0];if(!f)return;const el=document.getElementById(inId);const dt=new DataTransfer();dt.items.add(f);el.files=dt.files;onInp(el,dz,side,cb);}
+function rdy(){document.getElementById('btn1').disabled=!(headA.length&&headB.length);}
+
+function goS2(){
+  setStep(2);document.getElementById('s1').style.display='none';document.getElementById('s2').style.display='';
+  const A=LA(),B=LB();
+  document.getElementById('la-h').textContent=A;document.getElementById('lb-h').textContent=B;
+  document.getElementById('la2').textContent=A;document.getElementById('lb2').textContent=B;
+  document.getElementById('la2h').textContent=A+' columns';document.getElementById('lb2h').textContent=B+' columns';
+  document.getElementById('la-k').textContent=A;
+  const norm=s=>s.toLowerCase().replace(/[\s_\-\.]+/g,'');
+  const mr=document.getElementById('mrows');mr.innerHTML='';colMap={};
+  headA.forEach(col=>{
+    const best=headB.find(b=>norm(b)===norm(col))||headB.find(b=>norm(b).startsWith(norm(col).slice(0,5))||norm(col).startsWith(norm(b).slice(0,5)))||'';
+    colMap[col]=best;
+    const row=document.createElement('div');row.className='mrow';
+    const sel=document.createElement('select');sel.className='msel'+(best?' hit':'');
+    sel.innerHTML='<option value="">— Skip —</option>'+headB.map(b=>`<option value="${b}"${b===best?' selected':''}>${b}</option>`).join('');
+    sel.onchange=()=>{colMap[col]=sel.value;sel.className='msel'+(sel.value?' hit':'');};
+    row.innerHTML=`<div class="mchip" title="${col}">${col}</div><div class="marr">→</div>`;row.appendChild(sel);mr.appendChild(row);
+  });
+  const ks=document.getElementById('kc');
+  ks.innerHTML=headA.map(h=>`<option value="${h}">${h}</option>`).join('');
+  ks.value=headA.find(h=>/emp.?id|employee.?id|person.?id|empid|staff.?id/i.test(h))||headA.find(h=>/\bid\b|\bnum(ber)?\b/i.test(h))||headA[0];
+  chkBlank();
+}
+function chkBlank(){
+  const col=document.getElementById('kc').value;
+  const n=dataA.filter(r=>!String(r[col]??'').trim()).length;
+  document.getElementById('blkn').textContent=n;
+  document.getElementById('blkw').classList.toggle('hid',n===0);
+}
+function goS1(){document.getElementById('s2').style.display='none';document.getElementById('s1').style.display='';setStep(1);}
+
+function run(){
+  keyCol=document.getElementById('kc').value;
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+  const keyColB=colMap[keyCol]||keyCol;
+  const mapB={};
+  dataB.forEach(r=>{const k=String(r[keyColB]??'').trim();if(k)mapB[k]=r;});
+  results=[];const seen=new Set();
+  dataA.forEach(rA=>{
+    const k=String(rA[keyCol]??'').trim();
+    if(!k){results.push({key:'(blank)',status:'blank-key',rowA:rA,rowB:null,diffs:[]});return;}
+    const rB=mapB[k];
+    if(!rB){results.push({key:k,status:'missing-a',rowA:rA,rowB:null,diffs:[]});}
+    else{seen.add(k);const diffs=pairs.filter(([a,b])=>String(rA[a]??'').trim()!==String(rB[b]??'').trim()).map(([a,b])=>({colA:a,colB:b,valA:String(rA[a]??'').trim(),valB:String(rB[b]??'').trim()}));results.push({key:k,status:diffs.length?'mismatch':'match',rowA:rA,rowB:rB,diffs});}
+  });
+  Object.entries(mapB).forEach(([k,rB])=>{if(!seen.has(k))results.push({key:k,status:'missing-b',rowA:null,rowB:rB,diffs:[]});});
+
+  const c={match:0,mismatch:0,'missing-a':0,'missing-b':0,'blank-key':0};
+  results.forEach(r=>c[r.status]=(c[r.status]||0)+1);
+  document.getElementById('st0').textContent=c.match;
+  document.getElementById('st1').textContent=c.mismatch;
+  document.getElementById('st2').textContent=c['missing-a'];
+  document.getElementById('st3').textContent=c['missing-b'];
+  const A=LA(),B=LB();
+  document.getElementById('st2l').textContent='Missing in '+B;
+  document.getElementById('st3l').textContent='Missing in '+A;
+  document.getElementById('fb2').textContent='Missing in '+B;
+  document.getElementById('fb3').textContent='Missing in '+A;
+
+  buildTbl(pairs);
+  document.getElementById('s2').style.display='none';document.getElementById('s3').style.display='';setStep(3);
+  const sb=document.getElementById('skipbar');
+  if(c['blank-key']>0){sb.classList.remove('hid');sb.textContent='ℹ '+c['blank-key']+' row(s) in '+A+' had a blank "'+keyCol+'" — skipped. Use the Skipped filter to view them.';}
+  else sb.classList.add('hid');
+}
+
+function buildTbl(pairs){
+  const cols=pairs.map(([a])=>a);
+  document.getElementById('th').innerHTML='<tr>'
+    +'<th style="min-width:150px">Status</th>'
+    +'<th style="min-width:90px">'+keyCol+'</th>'
+    +'<th style="min-width:240px">Mismatched Fields</th>'
+    +cols.map(c=>'<th style="min-width:150px">'+c+' / '+colMap[c]+'</th>').join('')
+    +'</tr>';
+  renderTbl(pairs);
+}
+
+function renderTbl(pairs){
+  const A=LA(),B=LB(),cols=pairs.map(([a])=>a);
+  const vis=curF==='all'?results:results.filter(r=>r.status===curF);
+  if(!vis.length){document.getElementById('tb').innerHTML='<tr><td colspan="30" class="tbl-empty">No rows match this filter.</td></tr>';return;}
+  document.getElementById('tb').innerHTML=vis.map(r=>{
+    let badge='',rc='';
+    if(r.status==='match'){badge='<span class="bdg bm">✓ Match</span>';}
+    else if(r.status==='mismatch'){badge='<span class="bdg bmm">⚠ Mismatch</span>';rc='rmm';}
+    else if(r.status==='missing-a'){badge=`<span class="bdg boa">Missing in ${B}</span>`;rc='roa';}
+    else if(r.status==='missing-b'){badge=`<span class="bdg bob">Missing in ${A}</span>`;rc='rob';}
+    else{badge='<span class="bdg bsk">Skipped</span>';}
+
+    // Mismatched fields cell — the key improvement
+    let mfCell='<span class="vm">—</span>';
+    if(r.status==='mismatch'&&r.diffs.length){
+      mfCell='<div class="flist">'+r.diffs.map(d=>{
+        const va=d.valA||'(blank)',vb=d.valB||'(blank)';
+        return`<span class="ftag" title="${d.colA} in ${A}: ${va} | ${d.colB} in ${B}: ${vb}">${d.colA}: ${va} → ${vb}</span>`;
+      }).join('')+'</div>';
+    } else if(r.status==='missing-a'){
+      mfCell=`<span class="miss-note">Record found in ${A} but not in ${B}</span>`;
+    } else if(r.status==='missing-b'){
+      mfCell=`<span class="miss-note">Record found in ${B} but not in ${A}</span>`;
+    } else if(r.status==='blank-key'){
+      mfCell=`<span class="miss-note">Key column "${keyCol}" is blank — cannot match</span>`;
+    }
+
+    const cells=cols.map(col=>{
+      if(r.status==='missing-b'){const v=r.rowB?.[colMap[col]]??'';return`<td>${v||'<span class="vb">(blank)</span>'}</td>`;}
+      if(r.status==='missing-a'||r.status==='blank-key'){const v=r.rowA?.[col]??'';return`<td>${v||'<span class="vb">(blank)</span>'}</td>`;}
+      const diff=r.diffs.find(d=>d.colA===col);
+      if(diff)return`<td title="${A}: ${diff.valA||'(blank)'} | ${B}: ${diff.valB||'(blank)'}"><span class="vd">${diff.valA||'(blank)'}</span><span class="vv">→</span><span class="vm">${diff.valB||'(blank)'}</span></td>`;
+      const v=r.rowA?.[col]??'';return`<td>${v||'<span class="vb">(blank)</span>'}</td>`;
+    }).join('');
+
+    return`<tr class="${rc}"><td>${badge}</td><td><strong>${r.key}</strong></td><td class="wrap-cell">${mfCell}</td>${cells}</tr>`;
+  }).join('');
+}
+
+function filt(f,btn){
+  curF=f;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
+  btn.classList.add(f==='mismatch'?'or':f==='missing-a'?'oa':f==='missing-b'?'ob':'on');
+  renderTbl(Object.entries(colMap).filter(([a,b])=>b));
+}
+
+function exportXLSX(){
+  const A=LA(),B=LB();
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+  const rows=[];
+
+  // Header
+  rows.push([
+    keyCol+' (Key)',
+    'Status',
+    'Mismatched Fields',
+    'Missing In',
+    ...pairs.map(([a])=>a+' ['+A+']'),
+    ...pairs.map(([a])=>colMap[a]+' ['+B+']')
+  ]);
+
+  results.forEach(r=>{
+    let mf='',mi='';
+    const sl={
+      match:'Match',
+      mismatch:'Mismatch',
+      'missing-a':'Missing in '+B,
+      'missing-b':'Missing in '+A,
+      'blank-key':'Skipped — blank key'
+    }[r.status]||r.status;
+
+    if(r.status==='mismatch'){
+      // e.g. "Salary: 20 → 21 | Grade: 1 → 2"
+      mf=r.diffs.map(d=>`${d.colA}: ${d.valA||'(blank)'} → ${d.valB||'(blank)'}`).join(' | ');
+    } else if(r.status==='missing-a'){mi=B;mf='Record found in '+A+' but missing in '+B;}
+    else if(r.status==='missing-b'){mi=A;mf='Record found in '+B+' but missing in '+A;}
+    else if(r.status==='blank-key'){mf='Key column "'+keyCol+'" is blank in '+A;}
+
+    rows.push([
+      r.key, sl, mf, mi,
+      ...pairs.map(([a])=>r.rowA?.[a]??''),
+      ...pairs.map(([a])=>r.rowB?.[colMap[a]]??'')
+    ]);
+  });
+
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:14},{wch:22},{wch:50},{wch:16},...pairs.map(()=>({wch:18})),...pairs.map(()=>({wch:18}))];
+  XLSX.utils.book_append_sheet(wb,ws,'All Results');
+
+  // Mismatches only sheet
+  const mmOnly=[rows[0],...rows.slice(1).filter((_,i)=>results[i]&&results[i].status!=='match')];
+  if(mmOnly.length>1){const ws2=XLSX.utils.aoa_to_sheet(mmOnly);ws2['!cols']=ws['!cols'];XLSX.utils.book_append_sheet(wb,ws2,'Mismatches Only');}
+
+  XLSX.writeFile(wb,'ReconcileIQ_'+A+'_vs_'+B+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+function restart(){
+  document.getElementById('s3').style.display='none';document.getElementById('s1').style.display='';
+  ['dza','dzb'].forEach(id=>document.getElementById(id).classList.remove('ok','drag'));
+  [['ia-i','📂'],['ib-i','📂']].forEach(([id,v])=>document.getElementById(id).textContent=v);
+  ['ia-t','ib-t'].forEach(id=>document.getElementById(id).textContent='Click or drag & drop');
+  ['ia-n','ia-c','ib-n','ib-c'].forEach(id=>{const el=document.getElementById(id);el.textContent='';el.style.display='none';});
+  [['na','A'],['nb','B']].forEach(([id,v])=>{const el=document.getElementById(id);el.classList.remove('ok');el.textContent=v;});
+  ['ia','ib'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('la').value='';document.getElementById('lb').value='';
+  document.getElementById('la-h').textContent='First file';document.getElementById('lb-h').textContent='Second file';
+  headA=[];headB=[];dataA=[];dataB=[];results=[];curF='all';
+  document.getElementById('btn1').disabled=true;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
+  document.getElementById('fb0').classList.add('on');
+  setStep(1);
+}
+
+function setStep(n){
+  [1,2,3].forEach(i=>{
+    const d=document.getElementById('dot'+i),s=document.getElementById('sl'+i);
+    if(i<n){d.className='sc don';d.textContent='✓';}
+    else if(i===n){d.className='sc act';d.textContent=String(i);s.className='sl act';}
+    else{d.className='sc';d.textContent=String(i);s.className='sl';}
+  });
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('la').addEventListener('input',()=>document.getElementById('la-h').textContent=LA());
+  document.getElementById('lb').addEventListener('input',()=>document.getElementById('lb-h').textContent=LB());
+});
+</script>
+</body>
+</html>
