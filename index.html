@@ -208,7 +208,12 @@ tr:hover td{filter:brightness(.975);}
     <div class="card">
       <div class="ct">Map columns between your files</div>
       <div class="cd">Match each column from <strong id="la2">File A</strong> to its equivalent in <strong id="lb2">File B</strong>. Green border = auto-matched. Set any column to <em>Skip</em> to exclude it.</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;"><div class="mhdr" style="flex:1;margin:0"><span id="la2h">File A columns</span><span></span><span id="lb2h">File B columns</span></div><button class="ai-btn" id="ai-map-btn" onclick="aiMapColumns()"><span class="ai-ico">✨</span><div class="ai-spin"></div>AI Auto-Map <span class="ai-tag">NEW</span></button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <div class="mhdr" style="flex:1;margin:0"><span id="la2h">File A columns</span><span></span><span id="lb2h">File B columns</span></div>
+        <button class="ai-btn" id="ai-map-btn" onclick="aiMapColumns()" title="Auto-match columns using smart similarity">
+          ✨ Auto-Map Columns
+        </button>
+      </div>
       <div id="mrows"></div>
     </div>
     <div class="card">
@@ -333,117 +338,150 @@ function rdy(){const b=document.getElementById('btn1');if(b)b.disabled=!(headA.l
 function aiMapColumns(){
   if(!headA.length||!headB.length)return;
   const btn=document.getElementById('ai-map-btn');
-  btn.disabled=true;btn.classList.add('loading');
+  if(!btn)return;
+  btn.disabled=true;
+  btn.textContent='Matching…';
 
   setTimeout(()=>{
-    // ── Smart Column Matching ──────────────────────────────
-    // Step 1: normalize
-    const norm=s=>s.toLowerCase().replace(/[\s_\-\.]/g,'');
+    // ── Truly Generic Column Matcher ───────────────────────────────────
+    // Zero hardcoding. Suffix importance learned from the actual file columns.
+    // Works for HR, Finance, Inventory, CRM — any domain, any language.
 
-    // Step 2: extract core keyword by stripping common HR field affixes
-    function keywords(s){
-      const n=norm(s);
-      // Try all suffix/prefix combos to find the core word
-      const sfxs=['number','name','code','id','date','status','type','unit',
-                  'title','description','amount','rate','center','location',
-                  'address','email','phone','mobile','contact'];
-      const pfxs=['work','office','contact','official','annual','monthly','daily',
-                  'person','employee','emp','staff','job','position','pay',
-                  'cost','budget','report','active','given','family','full',
-                  'first','last','birth','hire','start','end'];
-      let core=n;
-      // strip suffix
-      for(const sfx of sfxs){
-        if(core!==sfx&&core.endsWith(sfx)&&core.length>sfx.length+1){core=core.slice(0,-sfx.length);break;}
-      }
-      // strip prefix
-      for(const pfx of pfxs){
-        if(core!==pfx&&core.startsWith(pfx)&&core.length>pfx.length+1){core=core.slice(pfx.length);break;}
-      }
-      return {full:n, core};
+    // 1. Tokenize: split on separators + camelCase
+    function tokenize(s){
+      return s.replace(/([a-z])([A-Z])/g,'$1_$2')
+        .toLowerCase().split(/[\s_\-\.\/\\]+/).filter(t=>t.length>0);
     }
 
-    // Step 3: synonym groups — words that mean the same thing
-    const groups=[
-      ['employeenumber','personnumber','empnumber','staffnumber','workerid','employeeid','personid'],
-      ['fullname','personfullname','employeename','workername','completename'],
-      ['firstname','givenname','fname','forename','first'],
-      ['lastname','familyname','surname','lname','last'],
-      ['department','departmentname','dept','deptname','orgunit','division','businessunit','org','team','businessgroup'],
-      ['location','worklocation','officelocation','site','worksite','workloc','office'],
-      ['grade','gradecode','band','payband','joblevel','level','tier','jobgrade','paygrade'],
-      ['salary','annualsalary','compensation','monthlycompensation','monthlysalary','payrate','wage','pay','ctc','basepay','basesalary','annualpay','monthlypay'],
-      ['status','employmentstatus','activestatus','empstatus','workertype','active'],
-      ['jobtitle','positiontitle','role','position','designation','title','jobrole'],
-      ['managerid','managernum','reportsto','supervisorid','supervisornum','reports'],
-      ['costcenter','costcentercode','budgetcenter','budgetcode','costcode','cc'],
-      ['gender','sex','gendercode'],
-      ['dateofbirth','birthdate','dob','birthday','born'],
-      ['dateofjoining','hiredate','joiningdate','startdate','doj','doh','joindate'],
-      ['phone','contactphone','mobilenumber','mobile','phonenumber','contactnumber','telephone'],
-      ['email','workemail','officialemail','emailaddress','workemail','contactemail'],
-      ['ssn','socialsecurity','taxid','nationalid','sin','socialsecuritynumber'],
-    ];
-
-    // Build lookup: normalized word → group index
-    const lookup={};
-    groups.forEach((g,gi)=>g.forEach(w=>{lookup[w]=gi;}));
-
-    // Step 4: score two column names
-    function score(a,b){
-      const ka=keywords(a), kb=keywords(b);
-      // Exact full match
-      if(ka.full===kb.full) return 100;
-      // One full contains other
-      if(ka.full.includes(kb.full)||kb.full.includes(ka.full)) return 90;
-      // Same synonym group (full)
-      if(lookup[ka.full]!==undefined&&lookup[ka.full]===lookup[kb.full]) return 88;
-      // Same synonym group (core)
-      if(ka.core&&kb.core&&lookup[ka.core]!==undefined&&lookup[ka.core]===lookup[kb.core]) return 85;
-      // Core exact match
-      if(ka.core&&kb.core&&ka.core===kb.core) return 82;
-      // Core contains the other full / vice versa
-      if(ka.core&&(kb.full.includes(ka.core)||ka.full.includes(kb.core||''))) return 70;
-      // Core in synonym group with full
-      if(ka.core&&lookup[ka.core]!==undefined&&lookup[ka.core]===lookup[kb.full]) return 68;
-      if(kb.core&&lookup[kb.core]!==undefined&&lookup[kb.core]===lookup[ka.full]) return 68;
-      // Partial string overlap
-      const shorter=ka.full.length<kb.full.length?ka.full:kb.full;
-      const longer=ka.full.length<kb.full.length?kb.full:ka.full;
-      if(shorter.length>=3&&longer.includes(shorter)) return 55;
-      return 0;
+    // 2. Edit distance
+    function editDist(a,b){
+      const la=a.length,lb=b.length;
+      const dp=Array.from({length:la+1},(_,i)=>Array.from({length:lb+1},(_,j)=>i===0?j:j===0?i:0));
+      for(let i=1;i<=la;i++) for(let j=1;j<=lb;j++)
+        dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+      return dp[la][lb];
     }
 
-    // Step 5: for each File A column, find best File B match
-    const mapping={};
-    headA.forEach(colA=>{
-      let bestCol=null,bestScore=0;
-      headB.forEach(colB=>{
-        const s=score(colA,colB);
-        if(s>bestScore){bestScore=s;bestCol=colB;}
+    // 3. Token similarity
+    function tokSim(a,b){
+      if(a===b)return 1.0;
+      if(a.includes(b)||b.includes(a))return 0.85;
+      const ml=Math.max(a.length,b.length);
+      if(!ml)return 0;
+      const s=1-editDist(a,b)/ml;
+      return s>0.55?s:0;
+    }
+
+    // 4. Learn suffix weights FROM the uploaded file columns (no hardcoding)
+    //    Suffix appearing in many columns = generic = low weight
+    //    Suffix appearing in few columns  = specific = high weight
+    function buildSuffixWeights(colsA,colsB){
+      const all=[...colsA,...colsB];
+      const n=all.length;
+      const count={};
+      all.forEach(col=>{
+        const toks=tokenize(col);
+        if(toks.length){
+          const sfx=toks[toks.length-1];
+          count[sfx]=(count[sfx]||0)+1;
+        }
       });
-      mapping[colA]=bestScore>=55?bestCol:null;
+      const weights={};
+      Object.entries(count).forEach(([tok,c])=>{weights[tok]=1.0-(c/n);});
+      return weights;
+    }
+
+    // 5. Score two columns
+    function score(colA,colB,sfxW){
+      const na=colA.toLowerCase().replace(/[\s_\-\.]+/g,'');
+      const nb=colB.toLowerCase().replace(/[\s_\-\.]+/g,'');
+      if(na===nb)return 1.0;
+      if(na.includes(nb)||nb.includes(na))return 0.92;
+
+      const ta=tokenize(colA),tb=tokenize(colB);
+      const seta=new Set(ta),setb=new Set(tb);
+
+      // Exact token overlap (Jaccard)
+      const inter=new Set([...seta].filter(t=>setb.has(t)));
+      if(inter.size){
+        const jac=inter.size/(seta.size+setb.size-inter.size);
+        if(jac>=0.5)return 0.80+jac*0.1;
+      }
+
+      // Pairwise best token match
+      const used=new Set();
+      let total=0,matches=0;
+      ta.forEach(ta_tok=>{
+        let best=0,bj=-1;
+        tb.forEach((tb_tok,j)=>{
+          if(!used.has(j)){const s=tokSim(ta_tok,tb_tok);if(s>best){best=s;bj=j;}}
+        });
+        if(best>=0.55){total+=best;matches++;if(bj>=0)used.add(bj);}
+      });
+
+      let base=0;
+      if(matches>0){
+        const cov=matches/Math.max(ta.length,tb.length);
+        base=(total/Math.max(ta.length,tb.length))*(0.6+cov*0.4);
+      }
+
+      // Suffix boost — weight is learned from file, not hardcoded
+      // High weight suffix (rare) = strong signal they’re the same field type
+      // Low weight suffix (common in this file) = weak signal
+      const lastA=ta[ta.length-1]||'',lastB=tb[tb.length-1]||'';
+      if(lastA===lastB&&lastA){
+        const w=sfxW[lastA]!==undefined?sfxW[lastA]:0.5;
+        const boost=0.45+w*0.30; // 0.45–0.75 depending on how specific the suffix is
+        base=Math.max(base,boost);
+      }
+
+      return base;
+    }
+
+    // 6. Build weights, then score all pairs
+    const sfxWeights=buildSuffixWeights(headA,headB);
+
+    const scored=headA.map(colA=>{
+      let best=null,bestS=0;
+      headB.forEach(colB=>{const s=score(colA,colB,sfxWeights);if(s>bestS){bestS=s;best=colB;}});
+      return{colA,best,bestS};
+    }).sort((a,b)=>b.bestS-a.bestS);
+
+    // 7. Greedy assign — highest confidence first, each B column used only once
+    const usedB=new Set(),mapping={};
+    scored.forEach(({colA,best,bestS})=>{
+      if(bestS>=0.48&&best&&!usedB.has(best)){mapping[colA]=best;usedB.add(best);}
+      else mapping[colA]=null;
     });
 
-    // Step 6: apply to dropdowns
-    let matched=0;
+    // 8. Apply to dropdowns
+    let matched=0;const unmatched=[];
     document.querySelectorAll('#mrows .mrow').forEach((row,i)=>{
       const col=headA[i];if(!col)return;
       const suggested=mapping[col];
       const sel=row.querySelector('select');if(!sel)return;
       if(suggested&&headB.includes(suggested)){
-        sel.value=suggested;colMap[col]=suggested;
-        sel.className='msel hit';matched++;
+        sel.value=suggested;colMap[col]=suggested;sel.className='msel hit';matched++;
+      } else {
+        sel.value='';colMap[col]='';sel.className='msel';unmatched.push(col);
       }
     });
 
-    btn.disabled=false;btn.classList.remove('loading');
+    btn.disabled=false;btn.textContent='✨ Auto-Map Columns';
     const note=document.createElement('div');
-    note.style.cssText='font-size:12px;color:#3C3489;background:#EEEDFE;border:1px solid #AFA9EC;border-radius:6px;padding:8px 12px;margin-top:8px;';
-    note.textContent='✨ Smart mapping: '+matched+' of '+headA.length+' columns matched. Review and adjust as needed.';
-    document.getElementById('mrows').before(note);
-    setTimeout(()=>note.remove(),5000);
-  },100);
+    note.style.cssText='font-size:12px;border-radius:6px;padding:8px 12px;margin-top:8px;';
+    if(unmatched.length){
+      note.style.cssText+='color:#633806;background:#FFFBEB;border:1px solid #FDE68A;';
+      note.innerHTML='✨ Auto-mapped <strong>'+matched+'</strong> of '+headA.length+' columns. '
+        +'<span style="color:var(--s)">'+unmatched.length+' need manual mapping — names are too different to auto-detect: <em>'+unmatched.join(', ')+'</em></span>';
+    } else {
+      note.style.cssText+='color:var(--gd);background:var(--gl);border:1px solid var(--gb);';
+      note.innerHTML='✨ All <strong>'+matched+'</strong> columns auto-mapped! Review below.';
+    }
+    const mrows=document.getElementById('mrows');
+    if(mrows)mrows.before(note);
+    setTimeout(()=>note.remove(),10000);
+  },50);
 }
 
 
