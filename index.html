@@ -336,73 +336,88 @@ function aiMapColumns(){
   btn.disabled=true;btn.classList.add('loading');
 
   setTimeout(()=>{
-    // Smart local matching — no API needed, works offline
-    // Uses: normalization + synonym dictionary + fuzzy scoring
-
-    const synonyms={
-      // Identity
-      'empid':['personid','personnumber','employeeid','empnumber','staffid','workerid','employeenumber'],
-      'ssn':['socialsecurity','taxid','nationalid','sin'],
-      // Name fields
-      'fullname':['name','empname','employeename','personname','workername','staffname'],
-      'firstname':['givenname','fname','forename'],
-      'lastname':['surname','lname','familyname'],
-      // Org
-      'department':['dept','deptname','division','businessunit','org','team'],
-      'servicecenter':['dept','department','costcenter','cc'],
-      'costcenter':['cc','department','dept'],
-      'location':['office','site','worklocation','workplace','city'],
-      'grade':['level','band','jobgrade','paygrade','tier'],
-      'jobtitle':['position','role','jobrole','title','designation'],
-      'manager':['supervisorid','managerid','reportsTo'],
-      // Pay
-      'salary':['payrate','wage','compensation','pay','ctc','annualpay','monthlypay','basepay','basesalary'],
-      'payrate':['salary','wage','pay','compensation','ctc'],
-      'address':['streetaddress','addr','homeaddress','residence'],
-      'status':['empstatus','employmentstatus','active','activestatus'],
-      'startdate':['hiredate','joiningdate','doj','dateofjoining','doh'],
-      'enddate':['terminationdate','exitdate','lastworkingday'],
-    };
-
-    // Normalize: lowercase, remove spaces/underscores/hyphens
+    // ── Smart Column Matching ──────────────────────────────
+    // Step 1: normalize
     const norm=s=>s.toLowerCase().replace(/[\s_\-\.]/g,'');
 
-    // Build reverse synonym lookup
-    const synLookup={};
-    Object.entries(synonyms).forEach(([key,vals])=>{
-      vals.forEach(v=>{
-        if(!synLookup[v])synLookup[v]=[];
-        synLookup[v].push(key);
-      });
-      if(!synLookup[key])synLookup[key]=[];
-      synLookup[key].push(key);
-    });
-
-    // Score how well two column names match (0-100)
-    function score(a,b){
-      const na=norm(a), nb=norm(b);
-      if(na===nb) return 100;                          // exact match
-      if(na.includes(nb)||nb.includes(na)) return 85;  // one contains other
-      // Check synonym groups
-      const groupsA=synLookup[na]||[];
-      const groupsB=synLookup[nb]||[];
-      if(groupsA.some(g=>groupsB.includes(g))) return 80; // same synonym group
-      // Check if either is in other's synonym list
-      const allSynsA=Object.values(synonyms).find(v=>v.includes(na)||synonyms[na]);
-      if(synonyms[na]&&synonyms[na].includes(nb)) return 78;
-      if(synonyms[nb]&&synonyms[nb].includes(na)) return 78;
-      // Partial overlap
-      if(na.startsWith(nb.slice(0,4))||nb.startsWith(na.slice(0,4))) return 60;
-      // Levenshtein-like: count common chars
-      const common=[...na].filter(c=>nb.includes(c)).length;
-      const sim=common/Math.max(na.length,nb.length);
-      return Math.round(sim*50);
+    // Step 2: extract core keyword by stripping common HR field affixes
+    function keywords(s){
+      const n=norm(s);
+      // Try all suffix/prefix combos to find the core word
+      const sfxs=['number','name','code','id','date','status','type','unit',
+                  'title','description','amount','rate','center','location',
+                  'address','email','phone','mobile','contact'];
+      const pfxs=['work','office','contact','official','annual','monthly','daily',
+                  'person','employee','emp','staff','job','position','pay',
+                  'cost','budget','report','active','given','family','full',
+                  'first','last','birth','hire','start','end'];
+      let core=n;
+      // strip suffix
+      for(const sfx of sfxs){
+        if(core!==sfx&&core.endsWith(sfx)&&core.length>sfx.length+1){core=core.slice(0,-sfx.length);break;}
+      }
+      // strip prefix
+      for(const pfx of pfxs){
+        if(core!==pfx&&core.startsWith(pfx)&&core.length>pfx.length+1){core=core.slice(pfx.length);break;}
+      }
+      return {full:n, core};
     }
 
-    // For each File A column, find best File B match
+    // Step 3: synonym groups — words that mean the same thing
+    const groups=[
+      ['employeenumber','personnumber','empnumber','staffnumber','workerid','employeeid','personid'],
+      ['fullname','personfullname','employeename','workername','completename'],
+      ['firstname','givenname','fname','forename','first'],
+      ['lastname','familyname','surname','lname','last'],
+      ['department','departmentname','dept','deptname','orgunit','division','businessunit','org','team','businessgroup'],
+      ['location','worklocation','officelocation','site','worksite','workloc','office'],
+      ['grade','gradecode','band','payband','joblevel','level','tier','jobgrade','paygrade'],
+      ['salary','annualsalary','compensation','monthlycompensation','monthlysalary','payrate','wage','pay','ctc','basepay','basesalary','annualpay','monthlypay'],
+      ['status','employmentstatus','activestatus','empstatus','workertype','active'],
+      ['jobtitle','positiontitle','role','position','designation','title','jobrole'],
+      ['managerid','managernum','reportsto','supervisorid','supervisornum','reports'],
+      ['costcenter','costcentercode','budgetcenter','budgetcode','costcode','cc'],
+      ['gender','sex','gendercode'],
+      ['dateofbirth','birthdate','dob','birthday','born'],
+      ['dateofjoining','hiredate','joiningdate','startdate','doj','doh','joindate'],
+      ['phone','contactphone','mobilenumber','mobile','phonenumber','contactnumber','telephone'],
+      ['email','workemail','officialemail','emailaddress','workemail','contactemail'],
+      ['ssn','socialsecurity','taxid','nationalid','sin','socialsecuritynumber'],
+    ];
+
+    // Build lookup: normalized word → group index
+    const lookup={};
+    groups.forEach((g,gi)=>g.forEach(w=>{lookup[w]=gi;}));
+
+    // Step 4: score two column names
+    function score(a,b){
+      const ka=keywords(a), kb=keywords(b);
+      // Exact full match
+      if(ka.full===kb.full) return 100;
+      // One full contains other
+      if(ka.full.includes(kb.full)||kb.full.includes(ka.full)) return 90;
+      // Same synonym group (full)
+      if(lookup[ka.full]!==undefined&&lookup[ka.full]===lookup[kb.full]) return 88;
+      // Same synonym group (core)
+      if(ka.core&&kb.core&&lookup[ka.core]!==undefined&&lookup[ka.core]===lookup[kb.core]) return 85;
+      // Core exact match
+      if(ka.core&&kb.core&&ka.core===kb.core) return 82;
+      // Core contains the other full / vice versa
+      if(ka.core&&(kb.full.includes(ka.core)||ka.full.includes(kb.core||''))) return 70;
+      // Core in synonym group with full
+      if(ka.core&&lookup[ka.core]!==undefined&&lookup[ka.core]===lookup[kb.full]) return 68;
+      if(kb.core&&lookup[kb.core]!==undefined&&lookup[kb.core]===lookup[ka.full]) return 68;
+      // Partial string overlap
+      const shorter=ka.full.length<kb.full.length?ka.full:kb.full;
+      const longer=ka.full.length<kb.full.length?kb.full:ka.full;
+      if(shorter.length>=3&&longer.includes(shorter)) return 55;
+      return 0;
+    }
+
+    // Step 5: for each File A column, find best File B match
     const mapping={};
     headA.forEach(colA=>{
-      let bestCol=null, bestScore=0;
+      let bestCol=null,bestScore=0;
       headB.forEach(colB=>{
         const s=score(colA,colB);
         if(s>bestScore){bestScore=s;bestCol=colB;}
@@ -410,27 +425,24 @@ function aiMapColumns(){
       mapping[colA]=bestScore>=55?bestCol:null;
     });
 
-    // Apply to dropdowns
+    // Step 6: apply to dropdowns
     let matched=0;
     document.querySelectorAll('#mrows .mrow').forEach((row,i)=>{
       const col=headA[i];if(!col)return;
       const suggested=mapping[col];
       const sel=row.querySelector('select');if(!sel)return;
       if(suggested&&headB.includes(suggested)){
-        sel.value=suggested;
-        colMap[col]=suggested;
-        sel.className='msel hit';
-        matched++;
+        sel.value=suggested;colMap[col]=suggested;
+        sel.className='msel hit';matched++;
       }
     });
 
     btn.disabled=false;btn.classList.remove('loading');
-
     const note=document.createElement('div');
-    note.style.cssText='font-size:12px;color:#3C3489;background:#EEEDFE;border:1px solid #AFA9EC;border-radius:6px;padding:6px 10px;margin-top:8px;';
-    note.textContent='✨ Smart matching: '+matched+' of '+headA.length+' columns matched. Review and adjust if needed.';
+    note.style.cssText='font-size:12px;color:#3C3489;background:#EEEDFE;border:1px solid #AFA9EC;border-radius:6px;padding:8px 12px;margin-top:8px;';
+    note.textContent='✨ Smart mapping: '+matched+' of '+headA.length+' columns matched. Review and adjust as needed.';
     document.getElementById('mrows').before(note);
-    setTimeout(()=>note.remove(),4000);
+    setTimeout(()=>note.remove(),5000);
   },100);
 }
 
