@@ -74,7 +74,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-e:hover{background:#C9F0E6;}
 .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
 @media(max-width:480px){.sgrid{grid-template-columns:repeat(2,1fr);}}
-.scard{background:var(--w);border:1px solid var(--br);border-radius:12px;padding:18px;text-align:center;}
+.scard{background:var(--w);border:1px solid var(--br);border-radius:12px;padding:18px;text-align:center;transition:all .15s;}
+.scard-click:hover{border-color:var(--g);background:var(--gl);transform:translateY(-2px);}
+.scard-click.active-card{border:2px solid var(--g);background:var(--gl);}
 .sn{font-size:32px;font-weight:800;line-height:1;}
 .slbl{font-size:11px;color:var(--s);margin-top:5px;font-weight:500;}
 .sn.cg{color:var(--g);}.sn.cr{color:var(--r);}.sn.ca{color:var(--a);}.sn.cb{color:var(--b);}
@@ -115,6 +117,38 @@ tr:hover td{filter:brightness(.975);}
 .vm{color:var(--s);}
 .skip-bar{font-size:12px;color:var(--s);padding:10px 14px;background:var(--bg);border-top:1px solid var(--br);}
 .err-m{color:var(--r);font-size:13px;margin-top:10px;}
+
+.rf-panel{background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:14px;border:1px solid var(--br);}
+.rf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.rf-title{font-size:12px;font-weight:700;color:var(--s);text-transform:uppercase;letter-spacing:.05em;}
+.rf-clear{font-size:12px;color:var(--r);cursor:pointer;font-weight:500;background:none;border:none;padding:0;}
+.rf-clear:hover{text-decoration:underline;}
+.rf-rows{display:flex;flex-direction:column;gap:8px;}
+.rf-row{display:grid;grid-template-columns:1fr 110px 1fr 32px;gap:8px;align-items:center;}
+.rf-row select,.rf-row input{width:100%;font-size:13px;border:1px solid var(--br);border-radius:8px;padding:8px 10px;background:var(--w);color:var(--t);outline:none;}
+.rf-row select:focus,.rf-row input:focus{border-color:var(--g);}
+.rf-row select.active,.rf-row input.active{border-color:var(--g);background:var(--gl);}
+.rf-add{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--g);cursor:pointer;font-weight:600;background:none;border:1px dashed var(--gb);border-radius:8px;padding:7px 14px;margin-top:6px;transition:all .15s;width:fit-content;}
+.rf-add:hover{background:var(--gl);}
+.rf-del{width:30px;height:30px;border-radius:7px;border:1px solid #FECACA;background:#FEF2F2;color:#991B1B;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.rf-del:hover{background:#FEE2E2;}
+.rf-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.rf-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;background:#E1F5EE;color:#085041;border-radius:20px;padding:3px 10px;font-weight:600;}
+.rf-tag button{background:none;border:none;cursor:pointer;color:#085041;font-size:13px;line-height:1;padding:0;}
+.rf-empty{font-size:12px;color:var(--s);text-align:center;padding:4px 0;}
+
+.ai-btn{display:flex;align-items:center;gap:7px;font-size:13px;padding:8px 16px;border-radius:8px;border:1px solid #AFA9EC;background:#EEEDFE;cursor:pointer;color:#3C3489;font-weight:600;transition:all .15s;white-space:nowrap;}
+.ai-btn:hover{background:#CECBF6;}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed;}
+.ai-btn .ai-spin{display:none;width:14px;height:14px;border:2px solid #AFA9EC;border-top-color:#534AB7;border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ai-btn.loading .ai-spin{display:block;}
+.ai-btn.loading .ai-ico{display:none;}
+.ai-tag{font-size:10px;background:#534AB7;color:#fff;padding:1px 6px;border-radius:10px;font-weight:700;}
+
+
+
+
 .tbl-empty{text-align:center;padding:40px;color:var(--s);}
 #pager button:disabled{opacity:.4;cursor:not-allowed;}
 </style>
@@ -174,7 +208,7 @@ tr:hover td{filter:brightness(.975);}
     <div class="card">
       <div class="ct">Map columns between your files</div>
       <div class="cd">Match each column from <strong id="la2">File A</strong> to its equivalent in <strong id="lb2">File B</strong>. Green border = auto-matched. Set any column to <em>Skip</em> to exclude it.</div>
-      <div class="mhdr"><span id="la2h">File A columns</span><span></span><span id="lb2h">File B columns</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;"><div class="mhdr" style="flex:1;margin:0"><span id="la2h">File A columns</span><span></span><span id="lb2h">File B columns</span></div><button class="ai-btn" id="ai-map-btn" onclick="aiMapColumns()"><span class="ai-ico">✨</span><div class="ai-spin"></div>AI Auto-Map <span class="ai-tag">NEW</span></button></div>
       <div id="mrows"></div>
     </div>
     <div class="card">
@@ -186,7 +220,7 @@ tr:hover td{filter:brightness(.975);}
         <div class="al al-am hid" id="blkw">⚠ <span><strong id="blkn">0</strong> row(s) have a blank value here and will be skipped. Use a column like Employee ID that is always filled.</span></div>
       </div>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;">
+    <div style="display:flex;gap:10px;align-items:center;margin-top:4px;">
       <button class="btn-g" onclick="goS1()">← Back</button>
       <button class="btn-p" style="margin-top:0;flex:1" onclick="run()">Find Mismatches →</button>
     </div>
@@ -214,8 +248,21 @@ tr:hover td{filter:brightness(.975);}
           <button class="btn-g" onclick="restart()">↺ Start over</button>
         </div>
       </div>
+      <!-- Result-level filter panel — add conditions manually -->
+      <div class="rf-panel" id="rf-panel" style="display:none">
+        <div class="rf-header">
+          <span class="rf-title">Filter results</span>
+          <button class="rf-clear" onclick="clearAllFilters()" id="rf-clear-btn" style="display:none">Clear all</button>
+        </div>
+        <div class="rf-rows" id="rf-rows">
+          <div class="rf-empty" id="rf-empty">No filters added — showing all rows. Click "+ Add filter" to narrow down results.</div>
+        </div>
+        <button class="rf-add" onclick="addResultFilter()">+ Add filter</button>
+        <div class="rf-tags" id="rf-tags"></div>
+      </div>
+
       <div class="fbar">
-        <span class="flbl">Filter:</span>
+        <span class="flbl">Status:</span>
         <button class="fb on" id="fb0" onclick="filt('all',this)">All rows</button>
         <button class="fb" id="fb1" onclick="filt('mismatch',this)">⚠ Mismatches</button>
         <button class="fb" id="fb2" onclick="filt('missing-a',this)">Missing in B</button>
@@ -232,7 +279,7 @@ tr:hover td{filter:brightness(.975);}
 </div>
 
 <script>
-let headA=[],headB=[],dataA=[],dataB=[],colMap={},keyCol='',results=[],curF='all',curPage=0,pageSize=200;
+let headA=[],headB=[],dataA=[],dataB=[],colMap={},keyCol='',results=[],curF='all',curPage=0,pageSize=200,activeFilters={},rfConditions=[];
 
 const SA=[
   {"emp id":"1","Employee name":"Ann","Service center":"108041",SSN:"xxx-xx-123",Salary:"20",Address:"union ave",Grade:"16"},
@@ -280,7 +327,113 @@ function onInp(el,dz,side,cb){const f=el.files[0];if(!f)return;parseF(f,(h,d)=>{
 function onDrag(e,id){e.preventDefault();document.getElementById(id).classList.add('drag');}
 function offDrag(id){document.getElementById(id).classList.remove('drag');}
 function onDrop(e,inId,dz,side,cb){e.preventDefault();offDrag(dz);const f=e.dataTransfer.files[0];if(!f)return;const el=document.getElementById(inId);const dt=new DataTransfer();dt.items.add(f);el.files=dt.files;onInp(el,dz,side,cb);}
-function rdy(){document.getElementById('btn1').disabled=!(headA.length&&headB.length);}
+function rdy(){const b=document.getElementById('btn1');if(b)b.disabled=!(headA.length&&headB.length);}
+
+
+function aiMapColumns(){
+  if(!headA.length||!headB.length)return;
+  const btn=document.getElementById('ai-map-btn');
+  btn.disabled=true;btn.classList.add('loading');
+
+  setTimeout(()=>{
+    // Smart local matching — no API needed, works offline
+    // Uses: normalization + synonym dictionary + fuzzy scoring
+
+    const synonyms={
+      // Identity
+      'empid':['personid','personnumber','employeeid','empnumber','staffid','workerid','employeenumber'],
+      'ssn':['socialsecurity','taxid','nationalid','sin'],
+      // Name fields
+      'fullname':['name','empname','employeename','personname','workername','staffname'],
+      'firstname':['givenname','fname','forename'],
+      'lastname':['surname','lname','familyname'],
+      // Org
+      'department':['dept','deptname','division','businessunit','org','team'],
+      'servicecenter':['dept','department','costcenter','cc'],
+      'costcenter':['cc','department','dept'],
+      'location':['office','site','worklocation','workplace','city'],
+      'grade':['level','band','jobgrade','paygrade','tier'],
+      'jobtitle':['position','role','jobrole','title','designation'],
+      'manager':['supervisorid','managerid','reportsTo'],
+      // Pay
+      'salary':['payrate','wage','compensation','pay','ctc','annualpay','monthlypay','basepay','basesalary'],
+      'payrate':['salary','wage','pay','compensation','ctc'],
+      'address':['streetaddress','addr','homeaddress','residence'],
+      'status':['empstatus','employmentstatus','active','activestatus'],
+      'startdate':['hiredate','joiningdate','doj','dateofjoining','doh'],
+      'enddate':['terminationdate','exitdate','lastworkingday'],
+    };
+
+    // Normalize: lowercase, remove spaces/underscores/hyphens
+    const norm=s=>s.toLowerCase().replace(/[\s_\-\.]/g,'');
+
+    // Build reverse synonym lookup
+    const synLookup={};
+    Object.entries(synonyms).forEach(([key,vals])=>{
+      vals.forEach(v=>{
+        if(!synLookup[v])synLookup[v]=[];
+        synLookup[v].push(key);
+      });
+      if(!synLookup[key])synLookup[key]=[];
+      synLookup[key].push(key);
+    });
+
+    // Score how well two column names match (0-100)
+    function score(a,b){
+      const na=norm(a), nb=norm(b);
+      if(na===nb) return 100;                          // exact match
+      if(na.includes(nb)||nb.includes(na)) return 85;  // one contains other
+      // Check synonym groups
+      const groupsA=synLookup[na]||[];
+      const groupsB=synLookup[nb]||[];
+      if(groupsA.some(g=>groupsB.includes(g))) return 80; // same synonym group
+      // Check if either is in other's synonym list
+      const allSynsA=Object.values(synonyms).find(v=>v.includes(na)||synonyms[na]);
+      if(synonyms[na]&&synonyms[na].includes(nb)) return 78;
+      if(synonyms[nb]&&synonyms[nb].includes(na)) return 78;
+      // Partial overlap
+      if(na.startsWith(nb.slice(0,4))||nb.startsWith(na.slice(0,4))) return 60;
+      // Levenshtein-like: count common chars
+      const common=[...na].filter(c=>nb.includes(c)).length;
+      const sim=common/Math.max(na.length,nb.length);
+      return Math.round(sim*50);
+    }
+
+    // For each File A column, find best File B match
+    const mapping={};
+    headA.forEach(colA=>{
+      let bestCol=null, bestScore=0;
+      headB.forEach(colB=>{
+        const s=score(colA,colB);
+        if(s>bestScore){bestScore=s;bestCol=colB;}
+      });
+      mapping[colA]=bestScore>=55?bestCol:null;
+    });
+
+    // Apply to dropdowns
+    let matched=0;
+    document.querySelectorAll('#mrows .mrow').forEach((row,i)=>{
+      const col=headA[i];if(!col)return;
+      const suggested=mapping[col];
+      const sel=row.querySelector('select');if(!sel)return;
+      if(suggested&&headB.includes(suggested)){
+        sel.value=suggested;
+        colMap[col]=suggested;
+        sel.className='msel hit';
+        matched++;
+      }
+    });
+
+    btn.disabled=false;btn.classList.remove('loading');
+
+    const note=document.createElement('div');
+    note.style.cssText='font-size:12px;color:#3C3489;background:#EEEDFE;border:1px solid #AFA9EC;border-radius:6px;padding:6px 10px;margin-top:8px;';
+    note.textContent='✨ Smart matching: '+matched+' of '+headA.length+' columns matched. Review and adjust if needed.';
+    document.getElementById('mrows').before(note);
+    setTimeout(()=>note.remove(),4000);
+  },100);
+}
+
 
 function goS2(){
   setStep(2);document.getElementById('s1').style.display='none';document.getElementById('s2').style.display='';
@@ -313,6 +466,10 @@ function chkBlank(){
 }
 function goS1(){document.getElementById('s2').style.display='none';document.getElementById('s1').style.display='';setStep(1);}
 
+
+
+
+
 function run(){
   keyCol=document.getElementById('kc').value;
   const pairs=Object.entries(colMap).filter(([a,b])=>b);
@@ -325,30 +482,39 @@ function run(){
     if(!k){results.push({key:'(blank)',status:'blank-key',rowA:rA,rowB:null,diffs:[]});return;}
     const rB=mapB[k];
     if(!rB){results.push({key:k,status:'missing-a',rowA:rA,rowB:null,diffs:[]});}
-    else{seen.add(k);const diffs=pairs.filter(([a,b])=>String(rA[a]??'').trim()!==String(rB[b]??'').trim()).map(([a,b])=>({colA:a,colB:b,valA:String(rA[a]??'').trim(),valB:String(rB[b]??'').trim()}));results.push({key:k,status:diffs.length?'mismatch':'match',rowA:rA,rowB:rB,diffs});}
+    else{
+      seen.add(k);
+      const diffs=pairs.filter(([a,b])=>String(rA[a]??'').trim()!==String(rB[b]??'').trim())
+        .map(([a,b])=>({colA:a,colB:b,valA:String(rA[a]??'').trim(),valB:String(rB[b]??'').trim()}));
+      results.push({key:k,status:diffs.length?'mismatch':'match',rowA:rA,rowB:rB,diffs});
+    }
   });
   Object.entries(mapB).forEach(([k,rB])=>{if(!seen.has(k))results.push({key:k,status:'missing-b',rowA:null,rowB:rB,diffs:[]});});
 
   const c={match:0,mismatch:0,'missing-a':0,'missing-b':0,'blank-key':0};
   results.forEach(r=>c[r.status]=(c[r.status]||0)+1);
+  const A=LA(),B=LB();
   document.getElementById('st0').textContent=c.match;
   document.getElementById('st1').textContent=c.mismatch;
   document.getElementById('st2').textContent=c['missing-a'];
   document.getElementById('st3').textContent=c['missing-b'];
-  const A=LA(),B=LB();
   document.getElementById('st2l').textContent='Missing in '+B;
   document.getElementById('st3l').textContent='Missing in '+A;
   document.getElementById('fb2').textContent='Missing in '+B;
   document.getElementById('fb3').textContent='Missing in '+A;
 
   buildTbl(pairs);
-  document.getElementById('s2').style.display='none';document.getElementById('s3').style.display='';setStep(3);
+  document.getElementById('s2').style.display='none';
+  document.getElementById('s3').style.display='';
+  setStep(3);
+
   const sb=document.getElementById('skipbar');
-  if(c['blank-key']>0){sb.classList.remove('hid');sb.textContent='ℹ '+c['blank-key']+' row(s) in '+A+' had a blank "'+keyCol+'" — skipped. Use the Skipped filter to view them.';}
+  if(c['blank-key']>0){sb.classList.remove('hid');sb.textContent='ℹ '+c['blank-key']+' row(s) had a blank "'+keyCol+'" and were skipped.';}
   else sb.classList.add('hid');
 }
 
 function buildTbl(pairs){
+  buildResultFilters(pairs);
   const cols=pairs.map(([a])=>a);
   document.getElementById('th').innerHTML='<tr>'
     +'<th style="min-width:150px">Status</th>'
@@ -361,7 +527,7 @@ function buildTbl(pairs){
 
 function renderTbl(pairs){
   const A=LA(),B=LB(),cols=pairs.map(([a])=>a);
-  const vis=curF==='all'?results:results.filter(r=>r.status===curF);
+  const vis=getFilteredResults();
   if(!vis.length){document.getElementById('tb').innerHTML='<tr><td colspan="30" class="tbl-empty">No rows match this filter.</td></tr>';renderPager(0,0);return;}
   const totalPages=Math.ceil(vis.length/pageSize);
   if(curPage>=totalPages)curPage=totalPages-1;
@@ -396,6 +562,7 @@ function renderTbl(pairs){
 
 function renderPager(total,totalPages){
   const el=document.getElementById('pager');
+  if(!el)return;
   if(totalPages<=1){el.style.display='none';return;}
   el.style.display='flex';
   const start=curPage*pageSize+1, end=Math.min((curPage+1)*pageSize,total);
@@ -410,7 +577,196 @@ function renderPager(total,totalPages){
 function goPage(p){curPage=p;renderTbl(Object.entries(colMap).filter(([a,b])=>b));window.scrollTo({top:document.getElementById('s3').offsetTop-20,behavior:'smooth'});}
 function changePageSize(v){pageSize=parseInt(v);curPage=0;renderTbl(Object.entries(colMap).filter(([a,b])=>b));}
 
+
+// ── Result-level filter conditions (add manually) ──────────
+
+function buildResultFilters(pairs){
+  const panel=document.getElementById('rf-panel');
+  if(!pairs.length){if(panel)panel.style.display='none';return;}
+  if(panel)panel.style.display='';
+  renderRFRows(pairs);
+}
+
+function addResultFilter(){
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+  rfConditions.push({col:'',op:'equals',val:''});
+  renderRFRows(pairs);
+}
+
+function removeResultFilter(i){
+  rfConditions.splice(i,1);
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+  renderRFRows(pairs);
+  applyResultFilters(pairs);
+}
+
+function renderRFRows(pairs){
+  const el=document.getElementById('rf-rows');
+  const empty=document.getElementById('rf-empty');
+  const clearBtn=document.getElementById('rf-clear-btn');
+
+  // Remove all datalists
+  document.querySelectorAll('datalist[id^="rfd-"]').forEach(d=>d.remove());
+
+  if(!rfConditions.length){
+    el.innerHTML='<div class="rf-empty" style="font-size:12px;color:var(--s);text-align:center;padding:4px 0">No filters added — click &quot;+ Add filter&quot; to narrow down results.</div>';
+    if(clearBtn)clearBtn.style.display='none';
+    renderRFTags();
+    return;
+  }
+  el.innerHTML='';
+  clearBtn.style.display='';
+  el.innerHTML='';
+
+  rfConditions.forEach((c,i)=>{
+    // Collect unique values for this column from results
+    const vals=[];
+    if(c.col){
+      const seen=new Set();
+      results.forEach(r=>{
+        const v=String(r.rowA?.[c.col]??'').trim();
+        if(v&&!seen.has(v)){seen.add(v);vals.push(v);}
+      });
+      vals.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+      if(vals.length){
+        const dl=document.createElement('datalist');
+        dl.id='rfd-'+i;
+        vals.forEach(v=>{const o=document.createElement('option');o.value=v;dl.appendChild(o);});
+        document.body.appendChild(dl);
+      }
+    }
+
+    const row=document.createElement('div');
+    row.className='rf-row';
+
+    // Column dropdown — all mapped columns
+    const colSel=document.createElement('select');
+    colSel.className='msel'+(c.col?' active':'');
+    colSel.innerHTML='<option value="">— pick column —</option>'+
+      pairs.map(([a])=>`<option value="${a}"${a===c.col?' selected':''}>${a}</option>`).join('');
+    colSel.onchange=()=>{rfConditions[i].col=colSel.value;rfConditions[i].val='';renderRFRows(pairs);};
+
+    // Operator
+    const ops=[['equals','='],['not_equals','≠'],['contains','contains'],['not_contains','excludes'],['greater','>'],['less','<']];
+    const opSel=document.createElement('select');
+    opSel.className='msel';
+    opSel.innerHTML=ops.map(([v,l])=>`<option value="${v}"${c.op===v?' selected':''}>${l}</option>`).join('');
+    opSel.onchange=()=>{rfConditions[i].op=opSel.value;applyResultFilters(pairs);};
+
+    // Value input with datalist
+    const valInp=document.createElement('input');
+    valInp.type='text';
+    valInp.className=(c.val?'active':'');
+    valInp.value=c.val||'';
+    valInp.placeholder=c.col?'Type or pick value…':'← pick column first';
+    valInp.disabled=!c.col;
+    if(vals.length) valInp.setAttribute('list','rfd-'+i);
+    valInp.addEventListener('input',()=>{
+      rfConditions[i].val=valInp.value;
+      valInp.className=(valInp.value?'active':'');
+      applyResultFilters(pairs);
+    });
+    valInp.addEventListener('change',()=>{
+      rfConditions[i].val=valInp.value;
+      valInp.className=(valInp.value?'active':'');
+      applyResultFilters(pairs);
+    });
+
+    // Delete button
+    const del=document.createElement('button');
+    del.className='rf-del';del.textContent='×';del.type='button';
+    del.onclick=()=>removeResultFilter(i);
+
+    row.appendChild(colSel);row.appendChild(opSel);row.appendChild(valInp);row.appendChild(del);
+    el.appendChild(row);
+  });
+  renderRFTags();
+}
+
+function renderRFTags(){
+  // Show active filters as pills below the rows
+  const tags=document.getElementById('rf-tags');
+  const active=rfConditions.filter(c=>c.col&&c.val);
+  if(!active.length){tags.innerHTML='';return;}
+  const opLabel={equals:'=',not_equals:'≠',contains:'contains',not_contains:'excludes',greater:'>',less:'<'};
+  tags.innerHTML=active.map((c,i)=>
+    `<span class="rf-tag">${c.col} ${opLabel[c.op]||c.op} "${c.val}"
+      <button onclick="clearOneFilter(${rfConditions.indexOf(c)})">×</button>
+    </span>`
+  ).join('');
+}
+
+function clearOneFilter(i){
+  rfConditions[i].val='';rfConditions[i].col='';
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+  renderRFRows(pairs);applyResultFilters(pairs);
+}
+
+function applyResultFilters(pairs){
+  curPage=0;updateStatCards();renderRFTags();renderTbl(pairs||Object.entries(colMap).filter(([a,b])=>b));
+}
+
+function clearAllFilters(){
+  rfConditions=[];
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+  renderRFRows(pairs);applyResultFilters(pairs);
+}
+
+function getFilteredResults(){
+  let vis=curF==='all'?results:results.filter(r=>r.status===curF);
+  const active=rfConditions.filter(c=>c.col&&c.val);
+  if(!active.length) return vis;
+  return vis.filter(r=>{
+    return active.every(c=>{
+      const v=String(r.rowA?.[c.col]??r.rowB?.[colMap[c.col]]??'').trim().toLowerCase();
+      const rv=c.val.toLowerCase();
+      switch(c.op){
+        case 'equals':      return v===rv;
+        case 'not_equals':  return v!==rv;
+        case 'contains':    return v.includes(rv);
+        case 'not_contains':return !v.includes(rv);
+        case 'greater':     return parseFloat(v)>parseFloat(rv);
+        case 'less':        return parseFloat(v)<parseFloat(rv);
+        default: return true;
+      }
+    });
+  });
+}
+
+function updateStatCards(){
+  const vis=getFilteredResults();
+  const c={match:0,mismatch:0,'missing-a':0,'missing-b':0};
+  vis.forEach(r=>c[r.status]=(c[r.status]||0)+1);
+  document.getElementById('st0').textContent=c.match;
+  document.getElementById('st1').textContent=c.mismatch;
+  document.getElementById('st2').textContent=c['missing-a'];
+  document.getElementById('st3').textContent=c['missing-b'];
+}
+
+
+function clickCard(f){
+  curPage=0;curF=f;
+  // Update filter buttons
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
+  const btnMap={'all':'fb0','mismatch':'fb1','missing-a':'fb2','missing-b':'fb3'};
+  const targetBtn=document.getElementById(btnMap[f]);
+  if(targetBtn){
+    const cls=f==='mismatch'?'or':f==='missing-a'?'oa':f==='missing-b'?'ob':'on';
+    targetBtn.classList.add(cls);
+  }
+  // Highlight active card
+  document.querySelectorAll('.scard-click').forEach(c=>c.classList.remove('active-card'));
+  const cardMap={'all':0,'mismatch':1,'missing-a':2,'missing-b':3};
+  const cards=document.querySelectorAll('.scard-click');
+  if(cards[cardMap[f]])cards[cardMap[f]].classList.add('active-card');
+  // Scroll to results table
+  document.getElementById('s3').scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{renderTbl(Object.entries(colMap).filter(([a,b])=>b));updateStatCards();},300);
+}
+
 function filt(f,btn){curPage=0;
+  // Keep field filters active, just change status filter
+  setTimeout(updateStatCards,0);
   curF=f;
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
   btn.classList.add(f==='mismatch'?'or':f==='missing-a'?'oa':f==='missing-b'?'ob':'on');
@@ -426,14 +782,13 @@ function exportXLSX(){
   rows.push([
     keyCol+' (Key)',
     'Status',
-    'Mismatched Fields',
+    'Mismatched Field',
     'Missing In',
     ...pairs.map(([a])=>a+' ['+A+']'),
     ...pairs.map(([a])=>colMap[a]+' ['+B+']')
   ]);
 
   results.forEach(r=>{
-    let mf='',mi='';
     const sl={
       match:'Match',
       mismatch:'Mismatch',
@@ -442,27 +797,29 @@ function exportXLSX(){
       'blank-key':'Skipped — blank key'
     }[r.status]||r.status;
 
-    if(r.status==='mismatch'){
-      // e.g. "Salary: 20 → 21 | Grade: 1 → 2"
-      mf=r.diffs.map(d=>`${d.colA}: ${d.valA||'(blank)'} → ${d.valB||'(blank)'}`).join(' | ');
-    } else if(r.status==='missing-a'){mi=B;mf='Record found in '+A+' but missing in '+B;}
-    else if(r.status==='missing-b'){mi=A;mf='Record found in '+B+' but missing in '+A;}
-    else if(r.status==='blank-key'){mf='Key column "'+keyCol+'" is blank in '+A;}
-
-    rows.push([
-      r.key, sl, mf, mi,
+    const valRow=(mfLabel,miLabel)=>rows.push([
+      r.key, sl, mfLabel, miLabel,
       ...pairs.map(([a])=>r.rowA?.[a]??''),
       ...pairs.map(([a])=>r.rowB?.[colMap[a]]??'')
     ]);
+
+    if(r.status==='mismatch'){
+      // One row per mismatched field
+      if(r.diffs.length===0){valRow('','')}
+      else r.diffs.forEach(d=>valRow(d.colA,''));
+    } else if(r.status==='missing-a'){valRow('',B);}
+    else if(r.status==='missing-b'){valRow('',A);}
+    else if(r.status==='blank-key'){valRow('Blank key','');}
+    else {valRow('','');} // match
   });
 
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:14},{wch:22},{wch:50},{wch:16},...pairs.map(()=>({wch:18})),...pairs.map(()=>({wch:18}))];
+  ws['!cols']=[{wch:14},{wch:20},{wch:20},{wch:16},...pairs.map(()=>({wch:20})),...pairs.map(()=>({wch:20}))];
   XLSX.utils.book_append_sheet(wb,ws,'All Results');
 
-  // Mismatches only sheet
-  const mmOnly=[rows[0],...rows.slice(1).filter((_,i)=>results[i]&&results[i].status!=='match')];
+  // Mismatches only — exclude match rows
+  const mmOnly=[rows[0],...rows.slice(1).filter(r=>r[1]!=='Match')];
   if(mmOnly.length>1){const ws2=XLSX.utils.aoa_to_sheet(mmOnly);ws2['!cols']=ws['!cols'];XLSX.utils.book_append_sheet(wb,ws2,'Mismatches Only');}
 
   XLSX.writeFile(wb,'ReconcileIQ_'+A+'_vs_'+B+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
@@ -478,8 +835,10 @@ function restart(){
   ['ia','ib'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('la').value='';document.getElementById('lb').value='';
   document.getElementById('la-h').textContent='First file';document.getElementById('lb-h').textContent='Second file';
-  headA=[];headB=[];dataA=[];dataB=[];results=[];curF='all';
-  document.getElementById('btn1').disabled=true;
+  headA=[];headB=[];dataA=[];dataB=[];results=[];curF='all';activeFilters={};rfConditions=[];
+  const b1=document.getElementById('btn1');if(b1)b1.disabled=true;
+  const rfp=document.getElementById('rf-panel');if(rfp)rfp.style.display='none';
+
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
   document.getElementById('fb0').classList.add('on');
   setStep(1);
