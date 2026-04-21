@@ -118,6 +118,67 @@ tr:hover td{filter:brightness(.975);}
 .skip-bar{font-size:12px;color:var(--s);padding:10px 14px;background:var(--bg);border-top:1px solid var(--br);}
 .err-m{color:var(--r);font-size:13px;margin-top:10px;}
 
+/* ── Assignment Workflow ── */
+.assign-sel{font-size:11px;border:1px solid var(--br);border-radius:6px;padding:4px 6px;background:var(--w);color:var(--t);outline:none;width:110px;cursor:pointer;}
+.assign-sel:focus{border-color:var(--g);}
+.status-sel{font-size:11px;border:1px solid var(--br);border-radius:6px;padding:4px 6px;background:var(--w);color:var(--t);outline:none;width:100px;cursor:pointer;}
+.status-sel.open{color:#991B1B;border-color:#FECACA;background:#FEF2F2;}
+.status-sel.inprogress{color:#633806;border-color:#FDE68A;background:#FFFBEB;}
+.status-sel.resolved{color:#085041;border-color:#6EE7B7;background:#ECFDF5;}
+.row-resolved{opacity:0.45;text-decoration:line-through;transition:opacity .3s;}
+.row-resolved td{color:var(--s)!important;}
+.resolved-badge{display:inline-block;font-size:10px;background:#ECFDF5;color:#085041;border:1px solid #6EE7B7;border-radius:10px;padding:1px 7px;font-weight:600;margin-left:4px;}
+.team-panel{background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--br);}
+.team-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.team-title{font-size:12px;font-weight:700;color:var(--s);text-transform:uppercase;letter-spacing:.05em;}
+.team-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.team-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;background:var(--w);border:1px solid var(--br);border-radius:20px;padding:4px 10px;color:var(--t);}
+.team-chip button{background:none;border:none;cursor:pointer;color:var(--s);font-size:12px;line-height:1;padding:0;}
+.team-chip button:hover{color:var(--r);}
+.team-add-row{display:flex;gap:6px;align-items:center;}
+.team-inp{font-size:13px;border:1px solid var(--br);border-radius:8px;padding:7px 10px;background:var(--w);color:var(--t);outline:none;flex:1;}
+.team-inp:focus{border-color:var(--g);}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:10px;}
+.summary-card{background:var(--w);border:1px solid var(--br);border-radius:10px;padding:10px 12px;}
+.summary-name{font-size:13px;font-weight:600;color:var(--t);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.summary-counts{font-size:11px;color:var(--s);line-height:1.6;}
+.summary-counts span{font-weight:600;}
+
+
+/* ── Template Panel ── */
+.tpl-panel{margin-bottom:14px;}
+.tpl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.tpl-title{font-size:12px;font-weight:700;color:var(--s);text-transform:uppercase;letter-spacing:.05em;}
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+.tpl-card{background:var(--w);border:1px solid var(--br);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;}
+.tpl-card:hover{border-color:var(--g);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.tpl-card.active{border:2px solid var(--g);background:var(--gl);}
+.tpl-card-name{font-size:13px;font-weight:600;color:var(--t);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tpl-card-meta{font-size:11px;color:var(--s);}
+.tpl-card-match{font-size:11px;font-weight:600;margin-top:4px;}
+.tpl-card-match.good{color:var(--gd);}
+.tpl-card-match.partial{color:#854F0B;}
+.tpl-card-match.none{color:var(--r);}
+.tpl-card-del{position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:var(--s);font-size:14px;opacity:0;transition:opacity .15s;line-height:1;}
+.tpl-card:hover .tpl-card-del{opacity:1;}
+.tpl-card-del:hover{color:var(--r);}
+.tpl-actions{display:flex;gap:8px;margin-top:10px;align-items:center;}
+.tpl-btn{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.tpl-btn-primary{background:var(--g);color:#fff;}.tpl-btn-primary:hover{opacity:.88;}
+.tpl-btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+.tpl-btn-ghost{background:var(--gl);color:var(--gd);border:1px solid var(--gb);}.tpl-btn-ghost:hover{background:var(--gb);}
+.tpl-empty{font-size:12px;color:var(--s);font-style:italic;padding:8px 0;}
+/* Save modal */
+.tpl-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.tpl-modal{background:var(--w);border-radius:14px;padding:24px;width:340px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.18);}
+.tpl-modal h3{font-size:16px;font-weight:600;color:var(--t);margin-bottom:4px;}
+.tpl-modal p{font-size:13px;color:var(--s);margin-bottom:14px;}
+.tpl-modal input{width:100%;font-size:14px;border:1px solid var(--br);border-radius:8px;padding:10px 12px;background:var(--bg);color:var(--t);outline:none;margin-bottom:12px;}
+.tpl-modal input:focus{border-color:var(--g);}
+.tpl-modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+
+
+
 .rf-panel{background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:14px;border:1px solid var(--br);}
 .rf-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .rf-title{font-size:12px;font-weight:700;color:var(--s);text-transform:uppercase;letter-spacing:.05em;}
@@ -205,6 +266,31 @@ tr:hover td{filter:brightness(.975);}
 
   <!-- STEP 2 -->
   <div id="s2" style="display:none">
+    <!-- Saved Templates Panel -->
+    <div class="tpl-panel card" id="tpl-panel">
+      <div class="tpl-header">
+        <span class="tpl-title">📋 Saved templates</span>
+        <button class="tpl-btn tpl-btn-ghost" onclick="openSaveModal()" style="font-size:11px;padding:5px 10px;">+ Save current mapping</button>
+      </div>
+      <div class="tpl-grid" id="tpl-grid"></div>
+      <div class="tpl-actions" id="tpl-actions" style="display:none">
+        <button class="tpl-btn tpl-btn-primary" id="tpl-apply-btn" onclick="applySelectedTemplate()">↓ Apply template</button>
+        <span id="tpl-apply-note" style="font-size:12px;color:var(--s)"></span>
+      </div>
+    </div>
+    <!-- Save modal -->
+    <div class="tpl-modal-bg" id="tpl-modal" style="display:none" onclick="if(event.target===this)closeSaveModal()">
+      <div class="tpl-modal">
+        <h3>Save mapping as template</h3>
+        <p>Give this column mapping a name so you can reuse it next time.</p>
+        <input type="text" id="tpl-name-inp" placeholder="e.g. Fusion HCM vs EBS Payroll" maxlength="50"
+          onkeydown="if(event.key==='Enter')confirmSaveTemplate()">
+        <div class="tpl-modal-btns">
+          <button class="tpl-btn tpl-btn-ghost" onclick="closeSaveModal()">Cancel</button>
+          <button class="tpl-btn tpl-btn-primary" onclick="confirmSaveTemplate()">Save template</button>
+        </div>
+      </div>
+    </div>
     <div class="card">
       <div class="ct">Map columns between your files</div>
       <div class="cd">Match each column from <strong id="la2">File A</strong> to its equivalent in <strong id="lb2">File B</strong>. Green border = auto-matched. Set any column to <em>Skip</em> to exclude it.</div>
@@ -234,10 +320,11 @@ tr:hover td{filter:brightness(.975);}
   <!-- STEP 3 -->
   <div id="s3" style="display:none">
     <div class="sgrid">
-      <div class="scard"><div class="sn cg" id="st0">—</div><div class="slbl">✓ Exact matches</div></div>
-      <div class="scard"><div class="sn cr" id="st1">—</div><div class="slbl">⚠ Mismatches</div></div>
-      <div class="scard"><div class="sn ca" id="st2">—</div><div class="slbl" id="st2l">Missing in File B</div></div>
-      <div class="scard"><div class="sn cb" id="st3">—</div><div class="slbl" id="st3l">Missing in File A</div></div>
+      <div class="scard scard-click" onclick="clickCard('match')" title="Show matched rows" style="cursor:pointer"><div class="sn cg" id="st0">—</div><div class="slbl">✓ Matches</div><div style="font-size:10px;color:var(--s);margin-top:4px">click to filter</div></div>
+      <div class="scard scard-click" onclick="clickCard('mismatch')" title="Show mismatches" style="cursor:pointer"><div class="sn cr" id="st1">—</div><div class="slbl">⚠ Mismatches</div><div style="font-size:10px;color:var(--s);margin-top:4px">click to filter</div></div>
+      <div class="scard scard-click" onclick="clickCard('missing-a')" title="Show missing" style="cursor:pointer"><div class="sn ca" id="st2">—</div><div class="slbl" id="st2l">Missing in B</div><div style="font-size:10px;color:var(--s);margin-top:4px">click to filter</div></div>
+      <div class="scard scard-click" onclick="clickCard('missing-b')" title="Show missing" style="cursor:pointer"><div class="sn cb" id="st3">—</div><div class="slbl" id="st3l">Missing in A</div><div style="font-size:10px;color:var(--s);margin-top:4px">click to filter</div></div>
+      <div class="scard scard-click" onclick="clickCard('resolved')" title="Show resolved" style="cursor:pointer"><div class="sn" id="st4" style="color:#085041">—</div><div class="slbl" style="color:#085041">✅ Resolved</div><div style="font-size:10px;color:var(--s);margin-top:4px">click to filter</div></div>
     </div>
     <div class="card">
       <div class="rbar">
@@ -249,9 +336,36 @@ tr:hover td{filter:brightness(.975);}
           </div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-g" id="hide-resolved-btn" onclick="toggleHideResolved()" style="font-size:12px;">Hide resolved</button>
           <button class="btn-e" onclick="exportXLSX()">⬇ Export Results (.xlsx)</button>
           <button class="btn-g" onclick="restart()">↺ Start over</button>
         </div>
+      </div>
+      <div id="email-toast" style="display:none;font-size:12px;background:var(--gl);border:1px solid var(--gb);border-radius:8px;padding:8px 12px;margin-bottom:8px;"></div>
+      <!-- Team Members Panel -->
+      <div class="team-panel" id="team-panel">
+        <div class="team-header">
+          <span class="team-title">👥 Team members</span>
+          <button onclick="toggleTeamPanel()" id="team-toggle" style="font-size:11px;color:var(--s);background:none;border:none;cursor:pointer;padding:0;">hide ▲</button>
+        </div>
+        <div id="team-body">
+          <div class="team-chips" id="team-chips">
+            <span style="font-size:12px;color:var(--s);font-style:italic">No team members yet — add below.</span>
+          </div>
+          <div class="team-add-row" style="margin-top:8px;">
+            <input class="team-inp" id="team-name-inp" placeholder="Name" maxlength="30" style="flex:1">
+            <input class="team-inp" id="team-email-inp" placeholder="Email (optional)" maxlength="80" style="flex:2"
+              onkeydown="if(event.key==='Enter')addTeamMember()">
+            <button class="tpl-btn tpl-btn-ghost" onclick="addTeamMember()" style="font-size:12px;padding:7px 12px;white-space:nowrap;">+ Add</button>
+          </div>
+        </div>
+      </div>
+      <!-- Assignment Summary -->
+      <div class="team-panel" id="summary-panel" style="display:none">
+        <div class="team-header">
+          <span class="team-title">📊 Assignment summary</span>
+        </div>
+        <div class="summary-grid" id="summary-grid"></div>
       </div>
       <!-- Result-level filter panel — add conditions manually -->
       <div class="rf-panel" id="rf-panel" style="display:none">
@@ -273,6 +387,7 @@ tr:hover td{filter:brightness(.975);}
         <button class="fb" id="fb2" onclick="filt('missing-a',this)">Missing in B</button>
         <button class="fb" id="fb3" onclick="filt('missing-b',this)">Missing in A</button>
         <button class="fb" id="fb4" onclick="filt('blank-key',this)">Skipped</button>
+        <button class="fb" id="fb5" onclick="filt('resolved',this)" style="color:#085041;border-color:#6EE7B7">✅ Resolved</button>
       </div>
       <div class="touter">
         <div class="twrap"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
@@ -284,7 +399,7 @@ tr:hover td{filter:brightness(.975);}
 </div>
 
 <script>
-let headA=[],headB=[],dataA=[],dataB=[],colMap={},keyCol='',results=[],curF='all',curPage=0,pageSize=200,activeFilters={},rfConditions=[];
+let headA=[],headB=[],dataA=[],dataB=[],colMap={},keyCol='',results=[],curF='all',curPage=0,pageSize=200,activeFilters={},rfConditions=[],hideResolved=false;
 
 const SA=[
   {"emp id":"1","Employee name":"Ann","Service center":"108041",SSN:"xxx-xx-123",Salary:"20",Address:"union ave",Grade:"16"},
@@ -333,6 +448,177 @@ function onDrag(e,id){e.preventDefault();document.getElementById(id).classList.a
 function offDrag(id){document.getElementById(id).classList.remove('drag');}
 function onDrop(e,inId,dz,side,cb){e.preventDefault();offDrag(dz);const f=e.dataTransfer.files[0];if(!f)return;const el=document.getElementById(inId);const dt=new DataTransfer();dt.items.add(f);el.files=dt.files;onInp(el,dz,side,cb);}
 function rdy(){const b=document.getElementById('btn1');if(b)b.disabled=!(headA.length&&headB.length);}
+
+
+
+// ── Template System ──────────────────────────────────────────
+const TPL_KEY='reconcileiq_templates';
+let selectedTplName=null;
+
+function getTemplates(){
+  try{return JSON.parse(localStorage.getItem(TPL_KEY)||'{}');}catch(e){return{};}
+}
+function saveTemplatesStore(tpls){
+  try{localStorage.setItem(TPL_KEY,JSON.stringify(tpls));}catch(e){}
+}
+
+function templateMatchScore(tpl){
+  // How well does this template match current files? (0-100)
+  const tplCols=Object.keys(tpl.colMap);
+  const matched=tplCols.filter(c=>headA.includes(c)&&headB.includes(tpl.colMap[c]));
+  if(!tplCols.length)return 0;
+  return Math.round((matched.length/tplCols.length)*100);
+}
+
+function renderTemplatePanel(){
+  const grid=document.getElementById('tpl-grid');
+  const actions=document.getElementById('tpl-actions');
+  if(!grid)return;
+  const tpls=getTemplates();
+  const keys=Object.keys(tpls);
+  selectedTplName=null;
+  if(actions)actions.style.display='none';
+
+  if(!keys.length){
+    grid.innerHTML='<div class="tpl-empty">No saved templates yet — map columns below and click "+ Save current mapping".</div>';
+    return;
+  }
+
+  grid.innerHTML='';
+  keys.forEach(name=>{
+    const tpl=tpls[name];
+    const score=templateMatchScore(tpl);
+    const matchClass=score>=80?'good':score>=40?'partial':'none';
+    const matchLabel=score>=80?'✓ '+score+'% columns match':score>=40?'⚠ '+score+'% match':'✗ Different columns';
+    const colCount=Object.values(tpl.colMap).filter(v=>v).length;
+
+    const card=document.createElement('div');
+    card.className='tpl-card';
+    card.dataset.name=name;
+    card.innerHTML=`
+      <button class="tpl-card-del" title="Delete template" onclick="deleteTpl('${name.replace(/'/g,"\'")}',event)">✕</button>
+      <div class="tpl-card-name" title="${name}">${name}</div>
+      <div class="tpl-card-meta">${colCount} columns · saved ${tpl.savedAt||'earlier'}</div>
+      <div class="tpl-card-match ${matchClass}">${matchLabel}</div>
+    `;
+    card.onclick=(e)=>{
+      if(e.target.classList.contains('tpl-card-del'))return;
+      selectTpl(name);
+    };
+    grid.appendChild(card);
+  });
+}
+
+function selectTpl(name){
+  // Deselect all
+  document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('active'));
+  const actions=document.getElementById('tpl-actions');
+  const note=document.getElementById('tpl-apply-note');
+
+  if(selectedTplName===name){
+    // Click again = deselect
+    selectedTplName=null;
+    if(actions)actions.style.display='none';
+    return;
+  }
+  selectedTplName=name;
+  const card=document.querySelector(`.tpl-card[data-name="${name}"]`);
+  if(card)card.classList.add('active');
+
+  const tpls=getTemplates();
+  const tpl=tpls[name];
+  const score=tpl?templateMatchScore(tpl):0;
+  if(actions)actions.style.display='flex';
+  if(note){
+    if(score>=80) note.textContent='Great match — ready to apply';
+    else if(score>=40) note.textContent=score+'% columns found in current files';
+    else note.textContent='Low match — columns may have changed';
+  }
+}
+
+function applySelectedTemplate(){
+  if(!selectedTplName)return;
+  const tpls=getTemplates();
+  const tpl=tpls[selectedTplName];
+  if(!tpl)return;
+
+  let matched=0,skipped=[];
+  document.querySelectorAll('#mrows .mrow').forEach((row,i)=>{
+    const col=headA[i];if(!col)return;
+    const mapped=tpl.colMap[col];
+    const sel=row.querySelector('select');if(!sel)return;
+    if(mapped&&headB.includes(mapped)){
+      sel.value=mapped;colMap[col]=mapped;sel.className='msel hit';matched++;
+    } else {
+      sel.value='';colMap[col]='';sel.className='msel';
+      if(tpl.colMap[col])skipped.push(col);
+    }
+  });
+
+  // Apply key column
+  if(tpl.keyCol){
+    const kc=document.getElementById('kc');
+    if(kc&&[...kc.options].some(o=>o.value===tpl.keyCol)){
+      kc.value=tpl.keyCol;chkBlank();
+    }
+  }
+
+  // Show result
+  const note=document.getElementById('tpl-apply-note');
+  if(note){
+    if(skipped.length){
+      note.innerHTML='<span style="color:var(--gd)">'+matched+' mapped.</span> <span style="color:#854F0B">'+skipped.length+' not found in current files — map manually.</span>';
+    } else {
+      note.innerHTML='<span style="color:var(--gd)">✓ All '+matched+' columns applied!</span>';
+    }
+  }
+}
+
+function deleteTpl(name,e){
+  e.stopPropagation();
+  if(!confirm('Delete template "'+name+'"?'))return;
+  const tpls=getTemplates();
+  delete tpls[name];
+  saveTemplatesStore(tpls);
+  if(selectedTplName===name){selectedTplName=null;}
+  renderTemplatePanel();
+}
+
+function openSaveModal(){
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+  if(!pairs.length){
+    alert('Please map at least one column before saving a template.');return;
+  }
+  const modal=document.getElementById('tpl-modal');
+  const inp=document.getElementById('tpl-name-inp');
+  if(modal)modal.style.display='flex';
+  if(inp){
+    inp.value=(LA()&&LB())?LA()+' vs '+LB():'';
+    setTimeout(()=>inp.focus(),50);
+  }
+}
+function closeSaveModal(){
+  const modal=document.getElementById('tpl-modal');
+  if(modal)modal.style.display='none';
+}
+function confirmSaveTemplate(){
+  const inp=document.getElementById('tpl-name-inp');
+  const name=(inp?.value||'').trim();
+  if(!name){inp?.focus();return;}
+
+  const kc=document.getElementById('kc');
+  const tpls=getTemplates();
+  tpls[name]={
+    colMap:{...colMap},
+    keyCol:kc?kc.value:'',
+    savedAt:new Date().toLocaleDateString()
+  };
+  saveTemplatesStore(tpls);
+  closeSaveModal();
+  renderTemplatePanel();
+  // Auto-select the saved template
+  setTimeout(()=>selectTpl(name),50);
+}
 
 
 function aiMapColumns(){
@@ -507,6 +793,7 @@ function goS2(){
   ks.innerHTML=headA.map(h=>`<option value="${h}">${h}</option>`).join('');
   ks.value=headA.find(h=>/emp.?id|employee.?id|person.?id|empid|staff.?id/i.test(h))||headA.find(h=>/\bid\b|\bnum(ber)?\b/i.test(h))||headA[0];
   chkBlank();
+  renderTemplatePanel();
 }
 function chkBlank(){
   const col=document.getElementById('kc').value;
@@ -521,6 +808,13 @@ function goS1(){document.getElementById('s2').style.display='none';document.getE
 
 
 function run(){
+  // Always clear previous assignments when starting a new comparison
+  // Clear all assignment data — completely fresh start
+  try{
+    localStorage.removeItem(ASSIGN_KEY);
+    // Also clear any stale keys
+    Object.keys(localStorage).filter(k=>k.startsWith('reconcileiq_a')).forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
   keyCol=document.getElementById('kc').value;
   const pairs=Object.entries(colMap).filter(([a,b])=>b);
   const keyColB=colMap[keyCol]||keyCol;
@@ -565,11 +859,15 @@ function run(){
 
 function buildTbl(pairs){
   buildResultFilters(pairs);
+  renderTeamChips();
+  updateSummary();
   const cols=pairs.map(([a])=>a);
   document.getElementById('th').innerHTML='<tr>'
     +'<th style="min-width:150px">Status</th>'
     +'<th style="min-width:90px">'+keyCol+'</th>'
     +'<th style="min-width:240px">Mismatched Fields</th>'
+    +'<th style="min-width:120px">Assign to</th>'
+    +'<th style="min-width:110px">Task status</th>'
     +cols.map(c=>'<th style="min-width:150px">'+c+' / '+colMap[c]+'</th>').join('')
     +'</tr>';
   renderTbl(pairs);
@@ -584,7 +882,11 @@ function renderTbl(pairs){
   const page=vis.slice(curPage*pageSize,(curPage+1)*pageSize);
   document.getElementById('tb').innerHTML=page.map(r=>{
     let badge='',rc='';
-    if(r.status==='match'){badge='<span class="bdg bm">✓ Match</span>';}
+    const rowResolved=isResolved(r);
+    if(rowResolved){
+      badge='<span class="bdg bm" style="background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7">✅ Resolved</span>';
+      rc='';
+    } else if(r.status==='match'){badge='<span class="bdg bm">✓ Match</span>';}
     else if(r.status==='mismatch'){badge='<span class="bdg bmm">⚠ Mismatch</span>';rc='rmm';}
     else if(r.status==='missing-a'){badge=`<span class="bdg boa">Missing in ${B}</span>`;rc='roa';}
     else if(r.status==='missing-b'){badge=`<span class="bdg bob">Missing in ${A}</span>`;rc='rob';}
@@ -605,7 +907,17 @@ function renderTbl(pairs){
       if(diff)return`<td title="${A}: ${diff.valA||'(blank)'} | ${B}: ${diff.valB||'(blank)'}"><span class="vd">${diff.valA||'(blank)'}</span><span class="vv">→</span><span class="vm">${diff.valB||'(blank)'}</span></td>`;
       const v=r.rowA?.[col]??'';return`<td>${v||'<span class="vb">(blank)</span>'}</td>`;
     }).join('');
-    return`<tr class="${rc}"><td>${badge}</td><td><strong>${r.key}</strong></td><td class="wrap-cell">${mfCell}</td>${cells}</tr>`;
+    // Assignment cells
+    const assignKey=r.key;
+    const assignData=getAssignment(assignKey);
+    const members=getTeamMembers();
+    const memberOpts=members.map(m=>`<option value="${m.name}"${assignData.assignee===m.name?' selected':''}>${m.name}</option>`).join('');
+    const statusOpts=['open','inprogress','resolved'].map(s=>`<option value="${s}"${assignData.status===s?' selected':''}>${s==='open'?'Open':s==='inprogress'?'In progress':'Resolved'}</option>`).join('');
+    const assignCell=r.status==='match'?'<td>—</td><td>—</td>':`<td><select class="assign-sel" onchange="setAssignee('${assignKey.replace(/'/g,"\'")}',this.value)"><option value="">Unassigned</option>${memberOpts}</select></td><td><select class="status-sel ${assignData.status||'open'}" onchange="setStatus('${assignKey.replace(/'/g,"\'")}',this.value,this)"><option value="">—</option>${statusOpts}</select></td>`;
+    const assignData2=getAssignment(r.key);
+    const resolvedCls=assignData2.status==='resolved'?' row-resolved':'';
+    const resolvedBadge=assignData2.status==='resolved'?'<span class="resolved-badge">✓ Resolved</span>':'';
+    return`<tr class="${rc}${resolvedCls}"><td>${badge}${resolvedBadge}</td><td><strong>${r.key}</strong></td><td class="wrap-cell">${mfCell}</td>${assignCell}${cells}</tr>`;
   }).join('');
   renderPager(vis.length,totalPages);
 }
@@ -626,6 +938,193 @@ function renderPager(total,totalPages){
 }
 function goPage(p){curPage=p;renderTbl(Object.entries(colMap).filter(([a,b])=>b));window.scrollTo({top:document.getElementById('s3').offsetTop-20,behavior:'smooth'});}
 function changePageSize(v){pageSize=parseInt(v);curPage=0;renderTbl(Object.entries(colMap).filter(([a,b])=>b));}
+
+
+
+// ── Assignment & Team System ──────────────────────────────────
+const TEAM_KEY='reconcileiq_team';
+const ASSIGN_KEY='reconcileiq_assignments';
+
+function getTeamMembers(){
+  try{return JSON.parse(localStorage.getItem(TEAM_KEY)||'[]');}catch(e){return[];}
+}
+function saveTeamMembers(m){
+  try{localStorage.setItem(TEAM_KEY,JSON.stringify(m));}catch(e){}
+}
+function getAssignments(){
+  try{return JSON.parse(localStorage.getItem(ASSIGN_KEY)||'{}');}catch(e){return{};}
+}
+function saveAssignments(a){
+  try{localStorage.setItem(ASSIGN_KEY,JSON.stringify(a));}catch(e){}
+}
+function getAssignment(key){
+  return getAssignments()[key]||{assignee:'',status:'open'};
+}
+
+function addTeamMember(){
+  const nameInp=document.getElementById('team-name-inp');
+  const emailInp=document.getElementById('team-email-inp');
+  const name=(nameInp?.value||'').trim();
+  const email=(emailInp?.value||'').trim();
+  if(!name)return;
+  const members=getTeamMembers();
+  if(members.find(m=>m.name===name)){nameInp.value='';return;}
+  members.push({name,email});
+  saveTeamMembers(members);
+  if(nameInp)nameInp.value='';
+  if(emailInp)emailInp.value='';
+  renderTeamChips();
+  renderTbl(Object.entries(colMap).filter(([a,b])=>b));
+}
+
+function removeTeamMember(name){
+  const members=getTeamMembers().filter(m=>m.name!==name);
+  saveTeamMembers(members);
+  renderTeamChips();
+  renderTbl(Object.entries(colMap).filter(([a,b])=>b));
+}
+
+function renderTeamChips(){
+  const el=document.getElementById('team-chips');
+  if(!el)return;
+  const members=getTeamMembers();
+  if(!members.length){
+    el.innerHTML='<span style="font-size:12px;color:var(--s);font-style:italic">No team members yet — add below.</span>';
+    return;
+  }
+  el.innerHTML=members.map(m=>`
+    <span class="team-chip">
+      <span>${m.name}</span>
+      ${m.email?`<span style="font-size:10px;color:var(--s)">·</span><span style="font-size:10px;color:var(--s)">${m.email}</span>`:''}
+      <button onclick="removeTeamMember('${m.name.replace(/'/g,"\'")}')">✕</button>
+    </span>`).join('');
+}
+
+function toggleTeamPanel(){
+  const body=document.getElementById('team-body');
+  const btn=document.getElementById('team-toggle');
+  if(!body||!btn)return;
+  const hidden=body.style.display==='none';
+  body.style.display=hidden?'':'none';
+  btn.textContent=hidden?'hide ▲':'show ▼';
+}
+
+function setAssignee(key,val){
+  const assigns=getAssignments();
+  if(!assigns[key])assigns[key]={assignee:'',status:'open'};
+  const prev=assigns[key].assignee;
+  assigns[key].assignee=val;
+  saveAssignments(assigns);
+  updateSummary();
+  // Send email notification if assignee has email
+  if(val&&val!==prev){
+    const members=getTeamMembers();
+    const member=members.find(m=>m.name===val);
+    if(member?.email){
+      sendAssignmentEmail(member,key,assigns[key]);
+    }
+  }
+}
+
+function setStatus(key,val,sel){
+  const assigns=getAssignments();
+  if(!assigns[key])assigns[key]={assignee:'',status:'open'};
+  assigns[key].status=val;
+  saveAssignments(assigns);
+  // Update dropdown class immediately
+  if(sel){sel.className='status-sel '+(val||'open');}
+  // Re-render table + update cards so resolved rows move correctly
+  updateStatCards();
+  updateSummary();
+  renderTbl(Object.entries(colMap).filter(([a,b])=>b));
+}
+
+function showResolvedToast(key,assignee){
+  const toast=document.getElementById('email-toast');
+  if(!toast)return;
+  // Build mailto to send to manager/assigner
+  const subject=encodeURIComponent('[ReconcileIQ] Task resolved — '+key);
+  const body=encodeURIComponent(
+    'Hi,\n\n'
+    +assignee+' has resolved the reconciliation task for record: '+key+'\n\n'
+    +'File A: '+LA()+'\n'
+    +'File B: '+LB()+'\n\n'
+    +'— ReconcileIQ'
+  );
+  toast.innerHTML='✅ Task resolved! <a href="mailto:?subject='+subject+'&body='+body+'" style="color:var(--gd);font-weight:600;margin-left:4px;">Notify manager →</a>';
+  toast.style.display='block';
+  toast.style.background='var(--gl)';
+  toast.style.borderColor='var(--gb)';
+  setTimeout(()=>{toast.style.display='none';},10000);
+}
+
+function toggleHideResolved(){
+  hideResolved=!hideResolved;
+  const btn=document.getElementById('hide-resolved-btn');
+  if(btn){
+    btn.textContent=hideResolved?'Show resolved':'Hide resolved';
+    btn.style.background=hideResolved?'var(--g)':'';
+    btn.style.color=hideResolved?'#fff':'';
+  }
+  curPage=0;
+  renderTbl(Object.entries(colMap).filter(([a,b])=>b));
+}
+
+function sendAssignmentEmail(member,key,assignment){
+  // Open user's email client pre-filled — works without any backend
+  const A=LA(),B=LB();
+  const subject=encodeURIComponent('[ReconcileIQ] New task assigned to you');
+  const body=encodeURIComponent(
+    'Hi '+member.name+',\n\n'
+    +'A reconciliation task has been assigned to you in ReconcileIQ.\n\n'
+    +'Record: '+key+'\n'
+    +'File A: '+A+'\n'
+    +'File B: '+B+'\n'
+    +'Status: '+( assignment.status||'open')+'\n\n'
+    +'Please log in to ReconcileIQ and review this mismatch.\n\n'
+    +'— ReconcileIQ'
+  );
+  const mailto='mailto:'+member.email+'?subject='+subject+'&body='+body;
+  // Show a small prompt so user can choose to send
+  const panel=document.getElementById('email-toast');
+  if(panel){
+    panel.innerHTML='📧 <a href="'+mailto+'" target="_blank" style="color:var(--gd);font-weight:600">Click to email '+member.name+'</a> about this assignment';
+    panel.style.display='block';
+    setTimeout(()=>{panel.style.display='none';},8000);
+  }
+}
+
+function updateSummary(){
+  const assigns=getAssignments();
+  const members=getTeamMembers();
+  const panel=document.getElementById('summary-panel');
+  const grid=document.getElementById('summary-grid');
+  if(!panel||!grid)return;
+  if(!members.length){panel.style.display='none';return;}
+
+  const stats={};
+  members.forEach(m=>{stats[m.name]={open:0,inprogress:0,resolved:0,total:0};});
+  Object.values(assigns).forEach(a=>{
+    if(a.assignee&&stats[a.assignee]!==undefined){
+      const s=a.status||'open';
+      stats[a.assignee][s]=(stats[a.assignee][s]||0)+1;
+      stats[a.assignee].total++;
+    }
+  });
+  const hasAny=members.some(m=>stats[m.name]?.total>0);
+  panel.style.display=hasAny?'':'none';
+  grid.innerHTML=members
+    .filter(m=>stats[m.name]?.total>0)
+    .map(m=>`
+      <div class="summary-card">
+        <div class="summary-name" title="${m.name}">${m.name}</div>
+        <div class="summary-counts">
+          <span style="color:#991B1B">${stats[m.name].open}</span> open &nbsp;
+          <span style="color:#633806">${stats[m.name].inprogress}</span> in progress &nbsp;
+          <span style="color:#085041">${stats[m.name].resolved}</span> done
+        </div>
+      </div>`).join('');
+}
 
 
 // ── Result-level filter conditions (add manually) ──────────
@@ -762,8 +1261,25 @@ function clearAllFilters(){
   renderRFRows(pairs);applyResultFilters(pairs);
 }
 
+function isResolved(r){
+  return getAssignments()[r.key]?.status==='resolved';
+}
+
 function getFilteredResults(){
-  let vis=curF==='all'?results:results.filter(r=>r.status===curF);
+  const assigns=getAssignments();
+  let vis;
+  if(curF==='resolved'){
+    // Show ALL rows that are marked resolved (regardless of original status)
+    vis=results.filter(r=>assigns[r.key]?.status==='resolved');
+  } else if(curF==='all'){
+    vis=results;
+  } else if(curF==='match'){
+    // Exact matches only (resolved rows also appear here as they were matches/mismatches fixed)
+    vis=results.filter(r=>r.status==='match');
+  } else {
+    // For mismatch/missing: exclude resolved rows so they move to resolved tab
+    vis=results.filter(r=>r.status===curF && assigns[r.key]?.status!=='resolved');
+  }
   const active=rfConditions.filter(c=>c.col&&c.val);
   if(!active.length) return vis;
   return vis.filter(r=>{
@@ -784,44 +1300,50 @@ function getFilteredResults(){
 }
 
 function updateStatCards(){
-  const vis=getFilteredResults();
+  const assigns=getAssignments();
+  const resolved=results.filter(r=>assigns[r.key]?.status==='resolved');
+  const unresolved=results.filter(r=>assigns[r.key]?.status!=='resolved');
   const c={match:0,mismatch:0,'missing-a':0,'missing-b':0};
-  vis.forEach(r=>c[r.status]=(c[r.status]||0)+1);
-  document.getElementById('st0').textContent=c.match;
-  document.getElementById('st1').textContent=c.mismatch;
+  unresolved.forEach(r=>c[r.status]=(c[r.status]||0)+1);
+  document.getElementById('st0').textContent=c.match;       // only true matches
+  document.getElementById('st1').textContent=c.mismatch;    // unresolved mismatches
   document.getElementById('st2').textContent=c['missing-a'];
   document.getElementById('st3').textContent=c['missing-b'];
+  const st4=document.getElementById('st4');
+  if(st4)st4.textContent=resolved.length;                   // resolved tasks
 }
 
 
 function clickCard(f){
-  curPage=0;curF=f;
-  // Update filter buttons
-  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
-  const btnMap={'all':'fb0','mismatch':'fb1','missing-a':'fb2','missing-b':'fb3'};
-  const targetBtn=document.getElementById(btnMap[f]);
-  if(targetBtn){
-    const cls=f==='mismatch'?'or':f==='missing-a'?'oa':f==='missing-b'?'ob':'on';
-    targetBtn.classList.add(cls);
-  }
-  // Highlight active card
-  document.querySelectorAll('.scard-click').forEach(c=>c.classList.remove('active-card'));
-  const cardMap={'all':0,'mismatch':1,'missing-a':2,'missing-b':3};
-  const cards=document.querySelectorAll('.scard-click');
-  if(cards[cardMap[f]])cards[cardMap[f]].classList.add('active-card');
-  // Scroll to results table
+  applyFilter(f);
   document.getElementById('s3').scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(()=>{renderTbl(Object.entries(colMap).filter(([a,b])=>b));updateStatCards();},300);
 }
 
-function filt(f,btn){curPage=0;
-  // Keep field filters active, just change status filter
-  setTimeout(updateStatCards,0);
+function applyFilter(f){
+  curPage=0;
   curF=f;
+  const pairs=Object.entries(colMap).filter(([a,b])=>b);
+
+  // Sync all filter buttons
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on','or','oa','ob'));
-  btn.classList.add(f==='mismatch'?'or':f==='missing-a'?'oa':f==='missing-b'?'ob':'on');
-  renderTbl(Object.entries(colMap).filter(([a,b])=>b));
+  const btnMap={all:'fb0',mismatch:'fb1','missing-a':'fb2','missing-b':'fb3',resolved:'fb5','blank-key':'fb4'};
+  const activeBtn=document.getElementById(btnMap[f]);
+  if(activeBtn){
+    const cls=f==='mismatch'?'or':f==='missing-a'?'oa':f==='missing-b'?'ob':'on';
+    activeBtn.classList.add(cls);
+  }
+
+  // Sync all stat cards
+  document.querySelectorAll('.scard-click').forEach(c=>c.classList.remove('active-card'));
+  const cardMap={all:-1,match:0,mismatch:1,'missing-a':2,'missing-b':3,resolved:4};
+  const cards=document.querySelectorAll('.scard-click');
+  if(cardMap[f]!==undefined&&cards[cardMap[f]])cards[cardMap[f]].classList.add('active-card');
+
+  renderTbl(pairs);
+  updateStatCards();
 }
+
+function filt(f,btn){applyFilter(f);}
 
 function exportXLSX(){
   const A=LA(),B=LB();
@@ -834,6 +1356,8 @@ function exportXLSX(){
     'Status',
     'Mismatched Field',
     'Missing In',
+    'Assigned To',
+    'Task Status',
     ...pairs.map(([a])=>a+' ['+A+']'),
     ...pairs.map(([a])=>colMap[a]+' ['+B+']')
   ]);
@@ -886,6 +1410,18 @@ function restart(){
   document.getElementById('la').value='';document.getElementById('lb').value='';
   document.getElementById('la-h').textContent='First file';document.getElementById('lb-h').textContent='Second file';
   headA=[];headB=[];dataA=[];dataB=[];results=[];curF='all';activeFilters={};rfConditions=[];
+  // Clear assignments for this session — fresh start means fresh tasks
+  // Clear all assignment data — completely fresh start
+  try{
+    localStorage.removeItem(ASSIGN_KEY);
+    // Also clear any stale keys
+    Object.keys(localStorage).filter(k=>k.startsWith('reconcileiq_a')).forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+  // Reset stat cards
+  ['st0','st1','st2','st3','st4'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+  // Hide summary panel
+  const sp=document.getElementById('summary-panel');if(sp)sp.style.display='none';
+  const hrb=document.getElementById('hide-resolved-btn');if(hrb){hrb.textContent='Hide resolved';hrb.style.background='';hrb.style.color='';}
   const b1=document.getElementById('btn1');if(b1)b1.disabled=true;
   const rfp=document.getElementById('rf-panel');if(rfp)rfp.style.display='none';
 
